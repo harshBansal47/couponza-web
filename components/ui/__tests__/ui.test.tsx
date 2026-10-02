@@ -108,7 +108,7 @@ describe("Select", () => {
 describe("Checkbox", () => {
   it("is a real checkbox and reports changes", () => {
     const onChange = vi.fn();
-    render(<Checkbox label="Email me" onChange={onChange} />);
+    render(<Checkbox label="Email me" checked={false} onChange={onChange} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Email me" }));
     expect(onChange).toHaveBeenCalledWith(true);
   });

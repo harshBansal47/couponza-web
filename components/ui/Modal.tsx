@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useCallback, type MouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 interface ModalProps {
@@ -91,7 +91,7 @@ export default function Modal({
   // every click inside the dialog would bubble up and close it — which makes
   // the confirm button in ConfirmModal fire alongside the close.
   const overlayClickHandler = closeOnOverlayClick
-    ? (event: React.MouseEvent<HTMLDivElement>) => {
+    ? (event: MouseEvent<HTMLDivElement>) => {
         if (event.target === event.currentTarget) onClose();
       }
     : undefined;

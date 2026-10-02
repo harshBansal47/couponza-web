@@ -115,6 +115,10 @@ export const api = {
   getCouponBySlug: (slug: string) =>
     apiFetch<CouponPublic>(`/coupons/by-slug/${encodeURIComponent(slug)}`, { revalidate: 30 }),
 
+  /** Account pages hold coupon ids (from /me/saved-coupons), not slugs. */
+  getCouponById: (couponId: string) =>
+    apiFetch<CouponPublic>(`/coupons/${couponId}`, { revalidate: 30 }),
+
   /** Affiliate URLs are only ever resolved by the server-side /go redirect. */
   goUrl: (couponId: string) => `${API_URL}/coupons/${couponId}/go`,
 
@@ -216,6 +220,18 @@ export const api = {
 
   me: (token: string) => apiFetch<User>("/auth/me", { token, cache: "no-store" }),
 
+  /** Self-service profile edit: display name and/or password. */
+  updateMe: (
+    token: string,
+    patch: { full_name?: string | null; password?: string; current_password?: string },
+  ) =>
+    apiFetch<User>("/auth/me", {
+      method: "PATCH",
+      token,
+      body: JSON.stringify(patch),
+      cache: "no-store",
+    }),
+
   // ---- Account (/me) ----------------------------------------------------
 
   listSavedStores: (token: string) => apiFetch<SavedItem[]>("/me/saved-stores", { token, cache: "no-store" }),
@@ -307,6 +323,7 @@ function orEmptyArray<T>(promise: Promise<T[]>): Promise<T[]> {
 export const resilient = {
   listCoupons: (params: CouponListParams = {}) => orEmpty(api.listCoupons(params)),
   getCouponBySlug: (slug: string) => orNull(api.getCouponBySlug(slug)),
+  getCouponById: (couponId: string) => orNull(api.getCouponById(couponId)),
   listStores: (params: StoreListParams = {}) => orEmpty(api.listStores(params)),
   getStoreBySlug: (slug: string) => orNull(api.getStoreBySlug(slug)),
   getStoreById: (storeId: string) => orNull(api.getStoreById(storeId)),
@@ -318,6 +335,7 @@ export const resilient = {
     params: { search?: string; store_id?: string; category_id?: string; skip?: number; limit?: number } = {},
   ) => orEmpty(api.listProducts(params)),
   getProductBySlug: (slug: string) => orNull(api.getProductBySlug(slug)),
+  getProductById: (id: string) => orNull(api.getProductById(id)),
   getPriceHistory: (productId: string) => orEmptyArray(api.getPriceHistory(productId)),
   getPageBySlug: (slug: string) => orNull(api.getPageBySlug(slug)),
   getCouponVerificationHistory: (couponId: string, limit = 50) =>

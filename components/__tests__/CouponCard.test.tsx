@@ -185,8 +185,8 @@ describe("CouponCard", () => {
           price={{ previous: 200, current: 150, productName: "Sony WH-1000XM5" }}
         />,
       );
-      expect(screen.getByText("$200.00")).toHaveClass("line-through");
-      expect(screen.getByText("$150.00")).toBeInTheDocument();
+      expect(screen.getByText("$200")).toHaveClass("line-through");
+      expect(screen.getByText("$150")).toBeInTheDocument();
       expect(screen.getByText("−25%")).toBeInTheDocument();
       expect(screen.getByText("Sony WH-1000XM5")).toBeInTheDocument();
     });
@@ -213,7 +213,7 @@ describe("CouponCard", () => {
           price={{ previous: 0, current: 150 }}
         />,
       );
-      expect(screen.getByText("$150.00")).toBeInTheDocument();
+      expect(screen.getByText("$150")).toBeInTheDocument();
       expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
     });
   });
@@ -228,7 +228,7 @@ describe("CouponCard", () => {
           minOrderValue={499}
         />,
       );
-      expect(screen.getByText("Free shipping over $499.00")).toBeInTheDocument();
+      expect(screen.getByText("Free shipping over $499")).toBeInTheDocument();
     });
 
     it("lists the eligible regions instead of guessing one", () => {
@@ -247,7 +247,10 @@ describe("CouponCard", () => {
       render(
         <CouponCard coupon={makeCoupon({ code: null })} store={store} variant="free-shipping" />,
       );
-      expect(screen.getByText("Free shipping")).toBeInTheDocument();
+      // Two elements legitimately read "Free shipping": the variant badge and
+      // the body line. The body is the one that would have carried a threshold.
+      expect(screen.getAllByText("Free shipping")).toHaveLength(2);
+      expect(screen.queryByText(/^Free shipping over/)).not.toBeInTheDocument();
     });
   });
 
@@ -302,8 +305,8 @@ describe("CouponCardGrid", () => {
     render(
       <CouponCardGrid
         coupons={[
-          makeCoupon({ id: "c1", slug: "one" }),
-          makeCoupon({ id: "c2", slug: "two", title: "Second deal" }),
+          makeCoupon({ id: "c1", slug: "one", store_id: "s1" }),
+          makeCoupon({ id: "c2", slug: "two", title: "Second deal", store_id: "s2" }),
         ]}
         stores={[store, { id: "s2", name: "Ajio", slug: "ajio" }]}
       />,
@@ -312,14 +315,15 @@ describe("CouponCardGrid", () => {
     expect(screen.getByRole("link", { name: /Ajio/ })).toBeInTheDocument();
   });
 
-  it("falls back to matching on slug when the store has no id", () => {
+  it("renders a coupon without a badge when its store id is not in the list", () => {
     render(
       <CouponCardGrid
-        coupons={[makeCoupon({ store_id: "unknown" })]}
-        stores={[{ name: "Ajio", slug: "ajio" }]}
+        coupons={[makeCoupon({ store_id: "s-unknown" })]}
+        stores={[{ id: "s1", name: "Ajio", slug: "ajio" }]}
       />,
     );
-    expect(screen.getByRole("link", { name: /Ajio/ })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Ajio/ })).not.toBeInTheDocument();
+    expect(screen.getByText("20% off headphones")).toBeInTheDocument();
   });
 
   it("still renders a coupon whose store was not supplied", () => {
@@ -339,10 +343,10 @@ describe("CouponCardGrid", () => {
     render(
       <CouponCardGrid
         coupons={[makeCoupon(), makeCoupon({ id: "c2", slug: "two", title: "Second deal" })]}
-        store={store}
         variant="free-shipping"
+        footnote={{ label: "Verify", href: "/verify" }}
       />,
     );
-    expect(screen.getAllByText("Free shipping")).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Verify" })).toHaveLength(2);
   });
 });

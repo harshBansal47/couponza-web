@@ -7,7 +7,8 @@ export type CouponCardVariant = "coupon" | "price-drop" | "free-shipping" | "exp
 
 /** The minimum a card needs to link to a store. */
 export interface CouponCardStore {
-  id?: string;
+  /** Must match `CouponPublic.store_id` so a grid can resolve the pair. */
+  id: string;
   name: string;
   slug: string;
   logo_url?: string | null;
@@ -262,7 +263,7 @@ export function CouponCardGrid({
   className?: string;
   price?: CouponCardProps["price"];
 } & Omit<CouponCardProps, "coupon" | "store" | "variant" | "price">) {
-  const storeById = new Map(stores.map((s) => [s.id ?? s.slug, s]));
+  const storeById = new Map(stores.map((s) => [s.id, s]));
 
   if (coupons.length === 0) return null;
 
