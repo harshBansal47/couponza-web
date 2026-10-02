@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MobileNav } from "./MobileNav";
-import { HeaderSearch } from "./HeaderSearch";
-import { MobileSearch } from "./HeaderSearch";
+import { HeaderSearch, MobileSearch } from "./HeaderSearch";
 
 const NAV = [
   { href: "/coupons", label: "Coupons" },
@@ -24,7 +23,14 @@ export default function Header() {
       setScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+
+    const onMobileSearchOpen = () => setMobileSearchOpen(true);
+    window.addEventListener("open-mobile-search", onMobileSearchOpen);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("open-mobile-search", onMobileSearchOpen);
+    };
   }, []);
 
   return (
@@ -69,7 +75,7 @@ export default function Header() {
 
           <button
             onClick={() => setMobileSearchOpen(true)}
-            className="md:hidden btn-ghost p-2 -mr-2"
+            className="md:hidden btn-ghost p-2 -mr-2 touch-target"
             aria-label="Search"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

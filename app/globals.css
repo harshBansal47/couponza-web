@@ -117,3 +117,100 @@ body {
   background-size: 12px 8px;
   background-repeat: repeat-x;
 }
+
+/* Safe area insets for mobile */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0);
+  --safe-area-inset-right: env(safe-area-inset-right, 0);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
+  --safe-area-inset-left: env(safe-area-inset-left, 0);
+}
+
+/* Mobile-first responsive utilities */
+.container {
+  @apply mx-auto max-w-5xl px-4 sm:px-6;
+}
+
+@layer utilities {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 200ms ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 300ms ease-out;
+  }
+  
+  .animate-slide-down {
+    animation: slideDown 200ms ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 640px) {
+  .mobile-full-width {
+    @apply w-full;
+  }
+  
+  .mobile-stack {
+    @apply flex-col;
+  }
+  
+  .mobile-text-center {
+    @apply text-center;
+  }
+  
+  /* Larger touch targets on mobile */
+  .btn, .input, select {
+    @apply min-h-[44px];
+  }
+  
+  /* Adjust modal for mobile */
+  .modal-mobile {
+    @apply m-0 rounded-none max-h-screen;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-grid-2 {
+    @apply grid-cols-2;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

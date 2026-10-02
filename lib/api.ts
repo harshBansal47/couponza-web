@@ -113,4 +113,7 @@ export const api = {
 
   getPriceHistory: (productId: string) =>
     apiFetch<PricePoint[]>(`/products/${productId}/price-history`, { revalidate: 60 }),
+
+  autocompleteProducts: (query: string, limit = 10) =>
+    apiFetch<string[]>(`/products/autocomplete?q=${encodeURIComponent(query)}&limit=${limit}`, { revalidate: 300 }),
 };
