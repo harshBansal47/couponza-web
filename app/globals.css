@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/*
+  Design concept: "proof, not promises." A ledger/receipt visual language —
+  paper, ink, hairline rules, a rubber-stamp verified green — instead of the
+  red-badge/countdown-clock urgency look every other coupon site uses. That
+  urgency look is exactly what a community-verified, commission-transparent
+  site should NOT look like; the calm, documentary tone is the differentiator.
+*/
+@theme {
+  --color-paper: #f7f6f1;
+  --color-paper-raised: #fcfbf8;
+  --color-ink: #22261f;
+  --color-ink-soft: #565c4e;
+  --color-verified: #1f6f4a;
+  --color-verified-soft: #e7efe9;
+  --color-rust: #b5502e;
+  --color-rust-soft: #f4e7e1;
+  --color-ledger-line: #d8d4c6;
+  --color-inkblue: #2c4a52;
+
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Visible keyboard focus everywhere, styled rather than suppressed. */
+:focus-visible {
+  outline: 2px solid var(--color-inkblue);
+  outline-offset: 2px;
+}
+
+/* The one bold motif: a perforated tear edge on the code-reveal panel. */
+.perforated-bottom {
+  position: relative;
+}
+.perforated-bottom::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 8px;
+  background-image: radial-gradient(circle at 6px 0, transparent 4px, var(--color-paper) 4.5px);
+  background-size: 12px 8px;
+  background-repeat: repeat-x;
+}
