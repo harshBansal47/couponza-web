@@ -117,3 +117,58 @@ export function RegisterForm({
     </form>
   );
 }
+
+export function ResetPasswordForm({
+  action,
+  token,
+}: {
+  action: (prev: ActionResult, formData: FormData) => Promise<ActionResult>;
+  token: string;
+}) {
+  const [state, formAction] = useActionState(action, EMPTY);
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <input type="hidden" name="token" value={token} />
+
+      <Input
+        label="New password"
+        name="new_password"
+        type="password"
+        autoComplete="new-password"
+        required
+        hint="At least 8 characters"
+      />
+
+      <Input
+        label="Confirm new password"
+        name="confirm_password"
+        type="password"
+        autoComplete="new-password"
+        required
+      />
+
+      <SubmitButton label="Reset password" pendingLabel="Resetting…" />
+
+      <ActionMessages state={state} />
+    </form>
+  );
+}
+
+export function ForgotPasswordForm({
+  action,
+}: {
+  action: (prev: ActionResult, formData: FormData) => Promise<ActionResult>;
+}) {
+  const [state, formAction] = useActionState(action, EMPTY);
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <Input label="Email address" name="email" type="email" autoComplete="email" required placeholder="you@example.com" />
+
+      <SubmitButton label="Send reset link" pendingLabel="Sending…" />
+
+      <ActionMessages state={state} />
+    </form>
+  );
+}

@@ -214,6 +214,22 @@ export const api = {
       cache: "no-store",
     }),
 
+  /** Request a password reset email. Always succeeds (even for unknown emails). */
+  forgotPassword: (email: string) =>
+    apiFetch<void>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+      cache: "no-store",
+    }),
+
+  /** Reset password using a token from the reset email. */
+  resetPassword: (token: string, new_password: string) =>
+    apiFetch<void>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token, new_password }),
+      cache: "no-store",
+    }),
+
   refresh: (refresh_token: string) =>
     apiFetch<TokenPair>("/auth/refresh", {
       method: "POST",
@@ -286,6 +302,15 @@ export const api = {
       method: "PATCH",
       token,
       body: JSON.stringify(patch),
+      cache: "no-store",
+    }),
+
+  /** Permanently delete the current user's account. */
+  deleteAccount: (token: string, current_password: string) =>
+    apiFetch<void>("/auth/me", {
+      method: "DELETE",
+      token,
+      body: JSON.stringify({ current_password }),
       cache: "no-store",
     }),
 

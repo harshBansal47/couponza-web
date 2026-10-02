@@ -81,6 +81,7 @@ export async function loginAction(
   _prev: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
+  "use server";
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const next = safeRedirect(formData.get("next"));
@@ -110,6 +111,7 @@ export async function registerAction(
   _prev: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
+  "use server";
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "").trim();
@@ -136,10 +138,105 @@ export async function registerAction(
 }
 
 export async function logoutAction(): Promise<void> {
+  "use server";
   await clearSessionCookies();
   const { redirect } = await import("next/navigation");
   redirect("/");
   throw new Error("redirect did not return");
+}
+
+/* ------------------------------------------------------------------ */
+/* Password reset                                                      */
+/* ------------------------------------------------------------------ */
+
+export async function forgotPasswordAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  "use server";
+  const email = String(formData.get("email") ?? "").trim();
+
+  if (!email) return fail("Enter your email address.");
+
+  try {
+    await api.forgotPassword(email);
+  } catch {
+    // Always succeed to prevent user enumeration
+    return ok("If an account exists, a reset email has been sent.");
+  }
+
+  return ok("If an account exists, a reset email has been sent.");
+}
+
+export async function resetPasswordAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  "use server";
+  const token = String(formData.get("token") ?? "");
+  const newPassword = String(formData.get("new_password") ?? "");
+  const confirmPassword = String(formData.get("confirm_password") ?? "");
+
+  if (!token) return fail("Invalid reset link.")
+  if (!newPassword || !confirmPassword)
+    return fail("Enter and confirm your new password.")
+  if (newPassword !== confirmPassword)
+    return fail("Passwords do not match.")
+  if (newPassword.length < 8)
+    return fail("Use a password of at least 8 characters.")
+
+  try {
+    await api.resetPassword(token, newPassword)
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 400) {
+      return fail("Invalid or expired reset token. Please request a new one.")
+    }
+    return fail(describeError(error))
+  }
+
+  const { redirect } = await import("next/navigation")
+  redirect("/account/login?reset=success")
+  throw new Error("redirect did not return")
+}
+
+/* ------------------------------------------------------------------ */
+/* Account deletion                                                    */
+/* ------------------------------------------------------------------ */
+
+export async function deleteAccountAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  "use server";
+  const confirmEmail = String(formData.get("confirm_email") ?? "").trim().toLowerCase()
+  const currentPassword = String(formData.get("current_password") ?? "")
+
+  if (!confirmEmail) return fail("Confirm your email address.")
+  if (!currentPassword) return fail("Enter your current password.")
+
+  try {
+    const token = await requireToken()
+    const me = await api.me(token)
+
+    if (confirmEmail !== me.email.toLowerCase()) {
+      return fail("The email address does not match your account.")
+    }
+
+    await api.deleteAccount(token, currentPassword)
+  } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.status === 401) return fail("Your session has expired. Please sign in again.")
+      if (error.status === 400) return fail("The password you entered is not correct.")
+    }
+    return fail(describeError(error))
+  }
+
+  // Clear the session cookies
+  await clearSessionCookies()
+
+  const { redirect } = await import("next/navigation")
+  redirect("/?deleted=success")
+  throw new Error("redirect did not return")
 }
 
 /* ------------------------------------------------------------------ */
@@ -150,6 +247,7 @@ export async function updateProfileAction(
   _prev: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
+  "use server";
   const fullName = String(formData.get("full_name") ?? "").trim();
   const newPassword = String(formData.get("new_password") ?? "");
   const currentPassword = String(formData.get("current_password") ?? "");
@@ -198,10 +296,12 @@ async function savedIds(
 }
 
 export async function getSavedStoreIds(): Promise<Set<string>> {
+  "use server";
   return savedIds("store", api.listSavedStores);
 }
 
 export async function getSavedCouponIds(): Promise<Set<string>> {
+  "use server";
   return savedIds("coupon", api.listSavedCoupons);
 }
 
@@ -209,6 +309,7 @@ export async function toggleSavedStore(
   storeId: string,
   currentlySaved: boolean,
 ): Promise<ActionResult> {
+  "use server";
   try {
     const token = await requireToken();
     if (currentlySaved) {
@@ -226,6 +327,7 @@ export async function toggleSavedCoupon(
   couponId: string,
   currentlySaved: boolean,
 ): Promise<ActionResult> {
+  "use server";
   try {
     const token = await requireToken();
     if (currentlySaved) {
@@ -247,6 +349,7 @@ export async function trackProductAction(
   _prev: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
+  "use server";
   const productId = String(formData.get("product_id") ?? "");
   const rawTarget = String(formData.get("target_price") ?? "").trim();
   const currency = String(formData.get("currency") ?? "USD").toUpperCase();
@@ -279,6 +382,7 @@ export async function updateTargetPriceAction(
   trackedId: string,
   rawTarget: string,
 ): Promise<ActionResult> {
+  "use server";
   const trimmed = rawTarget.trim();
   let targetPrice: number | null = null;
   if (trimmed) {
@@ -298,6 +402,7 @@ export async function updateTargetPriceAction(
 }
 
 export async function untrackProductAction(trackedId: string): Promise<ActionResult> {
+  "use server";
   try {
     const token = await requireToken();
     await api.untrackProduct(token, trackedId);
@@ -315,6 +420,7 @@ export async function updatePreferencesAction(
   _prev: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
+  "use server";
   const on = (name: string) => formData.get(name) === "on" || formData.get(name) === "true";
 
   // A push subscription is only meaningful alongside push_enabled, and an
@@ -361,6 +467,7 @@ export async function subscribePushAction(
   _prev: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
+  "use server";
   const token = await getAccessToken();
   if (!token) return fail("Sign in to turn on browser notifications.");
 
@@ -393,6 +500,7 @@ export async function subscribePushAction(
  * two buttons.
  */
 export async function unsubscribePushAction(previous: ActionResult): Promise<ActionResult> {
+  "use server";
   // The argument is only there because `useActionState` requires the
   // (state, formData) shape; this action takes no form.
   void previous;
@@ -416,6 +524,7 @@ export async function unsubscribePushAction(previous: ActionResult): Promise<Act
  * which is the safe direction: the toggle hides itself.
  */
 export async function loadPushKey(): Promise<PushPublicKey> {
+  "use server";
   try {
     return await api.getPushPublicKey();
   } catch {
@@ -432,6 +541,7 @@ export async function loadPushKey(): Promise<PushPublicKey> {
  * session — a signed-out reader clicking "unsubscribe" should still be honoured.
  */
 export async function unsubscribeAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  "use server";
   const email = String(formData.get("email") ?? "").trim();
   if (!email) return fail("Enter the email address you subscribed with.");
 
@@ -455,6 +565,7 @@ export async function unsubscribeAction(_prev: ActionResult, formData: FormData)
 /* ------------------------------------------------------------------ */
 
 export async function loadAccount() {
+  "use server";
   const token = await getAccessToken();
   if (!token) return null;
 
@@ -474,6 +585,7 @@ export async function loadAccount() {
 }
 
 export async function requireAccount() {
+  "use server";
   const account = await loadAccount();
   if (account) return account;
   const { redirect } = await import("next/navigation");

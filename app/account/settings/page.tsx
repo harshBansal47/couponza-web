@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AccountShell from "@/components/account/AccountShell";
 import ProfileForm from "@/components/account/ProfileForm";
-import { requireAccount, updateProfileAction } from "@/app/account/actions";
+import DeleteAccountForm from "@/components/account/DeleteAccountForm";
+import { requireAccount, updateProfileAction, deleteAccountAction } from "@/app/account/actions";
 import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -42,14 +43,12 @@ export default async function SettingsPage() {
           </div>
         </dl>
         <p className="mt-4 text-sm text-ink-soft">
-          To delete your account and everything attached to it, email{" "}
-          <a href="mailto:privacy@couponza.example" className="text-inkblue hover:underline">
-            privacy@couponza.example
-          </a>
-          . We remove saved stores, tracked products and alert history; your coupon verification
-          reports stay, without the account attached, because removing them would make other
-          people&apos;s success rates less honest.
+          To delete your account and everything attached to it, use the button below. We remove
+          saved stores, tracked products and alert history; your coupon verification reports stay,
+          without the account attached, because removing them would make other people&apos;s
+          success rates less honest.
         </p>
+        <DeleteAccountForm action={deleteAccountAction} user={user} />
       </section>
 
       <section className="mt-10 border-t border-ledger-line pt-6">
