@@ -6,14 +6,14 @@ import { useState, type FormEvent } from "react";
 export default function SearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("search") ?? "");
+  const [value, setValue] = useState(searchParams.get("q") ?? searchParams.get("search") ?? "");
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const params = new URLSearchParams(searchParams.toString());
-    if (value) params.set("search", value);
-    else params.delete("search");
-    router.push(`/?${params.toString()}`);
+    if (value) params.set("q", value);
+    else params.delete("q");
+    router.push(`/search?${params.toString()}`);
   }
 
   return (

@@ -3,6 +3,8 @@ import type {
   Category,
   CouponPublic,
   Paginated,
+  PricePoint,
+  Product,
   Store,
   VerifyResponse,
 } from "./types";
@@ -82,7 +84,7 @@ export const api = {
   getStoreBySlug: (slug: string) =>
     apiFetch<Store>(`/stores/by-slug/${encodeURIComponent(slug)}`, { revalidate: 300 }),
 
-  listCategories: (params: { parent_id?: string } = {}) =>
+  listCategories: (params: { parent_id?: string; limit?: number; skip?: number } = {}) =>
     apiFetch<Paginated<Category>>(`/categories${qs(params)}`, { revalidate: 300 }),
 
   getCategoryBySlug: (slug: string) =>
@@ -90,4 +92,13 @@ export const api = {
 
   getPageBySlug: (slug: string) =>
     apiFetch<CmsPage>(`/pages/by-slug/${encodeURIComponent(slug)}`, { revalidate: 300 }),
+
+  listProducts: (params: { search?: string; store_id?: string; category_id?: string; skip?: number; limit?: number } = {}) =>
+    apiFetch<Paginated<Product>>(`/products${qs(params)}`, { revalidate: 60 }),
+
+  getProductBySlug: (slug: string) =>
+    apiFetch<Product>(`/products/by-slug/${encodeURIComponent(slug)}`, { revalidate: 60 }),
+
+  getPriceHistory: (productId: string) =>
+    apiFetch<PricePoint[]>(`/products/${productId}/price-history`, { revalidate: 60 }),
 };

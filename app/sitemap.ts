@@ -27,7 +27,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: SITE_URL, changeFrequency: "hourly", priority: 1 },
+    { url: `${SITE_URL}/coupons`, changeFrequency: "hourly", priority: 0.9 },
+    { url: `${SITE_URL}/deals`, changeFrequency: "hourly", priority: 0.9 },
+    { url: `${SITE_URL}/stores`, changeFrequency: "daily", priority: 0.8 },
+    { url: `${SITE_URL}/categories`, changeFrequency: "daily", priority: 0.8 },
+    { url: `${SITE_URL}/search`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${SITE_URL}/trust`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${SITE_URL}/how-it-works`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${SITE_URL}/contact`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${SITE_URL}/terms`, changeFrequency: "yearly", priority: 0.2 },
     ...coupons.items.map((coupon) => ({
       url: `${SITE_URL}/coupons/${coupon.slug}`,
       lastModified: coupon.last_verified_at ?? coupon.created_at,

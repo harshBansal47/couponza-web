@@ -1,43 +1,27 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { api } from "@/lib/api";
-import CategoryChips from "@/components/CategoryChips";
-import CouponCodePanel from "@/components/CouponCodePanel";
 import CouponRow from "@/components/CouponRow";
-import Pagination from "@/components/Pagination";
-import SearchBar from "@/components/SearchBar";
+import SectionTitle from "@/components/SectionTitle";
 import { absoluteUrl } from "@/lib/seo";
-
-const PAGE_SIZE = 20;
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: { canonical: absoluteUrl("/") } };
 }
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ search?: string; skip?: string }>;
-}) {
-  const { search, skip: skipParam } = await searchParams;
-  const skip = Math.max(Number(skipParam) || 0, 0);
-
+export default async function HomePage() {
   const [couponsPage, categoriesPage, storesPage] = await Promise.all([
-    api.listCoupons({ search, skip, limit: PAGE_SIZE }),
-    api.listCategories(),
-    // Bounded lookup for display names/logos on the listing. Fine at this
-    // scale; once the store count grows past ~100 this should become a
-    // backend "include=store" param on /coupons instead of a second fetch.
-    api.listStores({ limit: 100 }),
+    api.listCoupons({ skip: 0, limit: 12 }),
+    api.listCategories({ limit: 100 }),
+    api.listStores({ limit: 12 }),
   ]);
 
   const storeById = new Map(storesPage.items.map((s) => [s.id, s]));
-  // Tied to the current page's first result would make the hero panel shift
-  // around as people paginate — only show it on the unfiltered first page.
-  const exampleCoupon = skip === 0 && !search ? couponsPage.items[0] : undefined;
+  const verifiedDeals = couponsPage.items
+    .filter((c) => c.last_verified_at !== null)
+    .sort((a, b) => (b.success_rate ?? 0) - (a.success_rate ?? 0))
+    .slice(0, 4);
 
-  // WebSite schema with a SearchAction is what makes a sitelinks search box
-  // eligible in Google results — a small, free SEO win for a search-driven
-  // product like this one.
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -45,50 +29,57 @@ export default async function HomePage({
     url: absoluteUrl("/"),
     potentialAction: {
       "@type": "SearchAction",
-      target: `${absoluteUrl("/")}?search={search_term_string}`,
+      target: `${absoluteUrl("/")}search?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
-      />
+    <div className="mx-auto max-w-5xl px-6 py-14">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
 
-      {skip === 0 && !search ? (
-        <section className="mb-16 grid gap-10 md:grid-cols-2 md:items-center">
-          <div>
-            <h1 className="font-serif text-4xl leading-tight text-ink md:text-5xl">
-              The deals we show you, verified by people — not by whoever paid us most.
-            </h1>
-            <p className="mt-4 max-w-sm text-ink-soft">
-              Every code here carries a real success rate from real reports, and every page
-              discloses exactly what we earn if you use it.
-            </p>
-          </div>
-          {exampleCoupon && <CouponCodePanel coupon={exampleCoupon} />}
-        </section>
-      ) : (
-        <h1 className="mb-8 font-serif text-3xl text-ink">
-          {search ? `Results for "${search}"` : "All deals"}
+      {/* Hero */}
+      <section className="mb-16 text-center">
+        <h1 className="font-serif text-4xl leading-tight text-ink md:text-5xl">
+          Find a deal worth trusting.
         </h1>
-      )}
-
-      <section className="mb-8 space-y-4">
-        <SearchBar />
-        <CategoryChips categories={categoriesPage.items} />
+        <p className="mx-auto mt-4 max-w-xl text-ink-soft">
+          Search stores, products, coupons and deals — every code carries a real community success rate,
+          and every commission we earn is disclosed on the page.
+        </p>
+        <form action="/search" className="mx-auto mt-8 max-w-2xl">
+          <label htmlFor="hero-search" className="sr-only">Search</label>
+          <input
+            id="hero-search"
+            name="q"
+            type="search"
+            placeholder="Search Nike, laptops, Amazon…"
+            className="w-full border border-ledger-line bg-paper-raised px-5 py-4 font-mono text-sm text-ink shadow-sm focus:border-inkblue"
+          />
+        </form>
+        <p className="mt-4 text-sm text-ink-soft">
+          Popular:{" "}
+          {storesPage.items.slice(0, 4).map((s, i) => (
+            <span key={s.id}>
+              {i > 0 ? " · " : ""}
+              <Link href={`/stores/${s.slug}`} className="text-inkblue hover:underline">
+                {s.name}
+              </Link>
+            </span>
+          ))}
+        </p>
       </section>
 
-      <section>
-        {couponsPage.items.length === 0 ? (
-          <p className="py-12 text-center text-ink-soft">
-            Nothing matches yet. Try a different search, or check back soon.
+      {/* Verified deals */}
+      <section className="mb-16">
+        <SectionTitle hint={`${verifiedDeals.length} of ${couponsPage.total}`}>Verified deals</SectionTitle>
+        {verifiedDeals.length === 0 ? (
+          <p className="py-8 text-center text-sm text-ink-soft">
+            No verified deals yet — reports from shoppers land here first.
           </p>
         ) : (
           <div>
-            {couponsPage.items.map((coupon) => {
+            {verifiedDeals.map((coupon) => {
               const store = storeById.get(coupon.store_id);
               return (
                 <CouponRow
@@ -100,13 +91,55 @@ export default async function HomePage({
             })}
           </div>
         )}
-        <Pagination
-          basePath="/"
-          searchParams={{ search }}
-          skip={skip}
-          limit={PAGE_SIZE}
-          total={couponsPage.total}
-        />
+        <p className="mt-4 text-right text-sm">
+          <Link href="/coupons" className="text-inkblue hover:underline">All coupons →</Link>
+        </p>
+      </section>
+
+      {/* Popular stores */}
+      <section className="mb-16">
+        <SectionTitle>Popular stores</SectionTitle>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {storesPage.items.slice(0, 8).map((s) => (
+            <Link
+              key={s.id}
+              href={`/stores/${s.slug}`}
+              className="border border-ledger-line bg-paper-raised px-4 py-6 text-center text-sm text-ink transition-colors hover:border-inkblue hover:text-inkblue"
+            >
+              {s.name}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="mb-16" id="categories">
+        <SectionTitle>Browse by category</SectionTitle>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {categoriesPage.items.slice(0, 9).map((c) => (
+            <Link
+              key={c.id}
+              href={`/categories/${c.slug}`}
+              className="border border-ledger-line bg-paper-raised px-4 py-4 text-sm text-ink transition-colors hover:border-inkblue hover:text-inkblue"
+            >
+              {c.name}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Trust strip */}
+      <section className="grid gap-6 border-t border-ledger-line pt-10 sm:grid-cols-3">
+        {[
+          ["Community verified", "Every code carries a real success rate from real reports."],
+          ["Transparent commissions", "We disclose exactly what we earn on every page."],
+          ["Evidence-based deals", "Freshness is measured by verification, not marketing."],
+        ].map(([title, body]) => (
+          <div key={title}>
+            <p className="font-mono text-xs uppercase tracking-wider text-verified">✓ {title}</p>
+            <p className="mt-2 text-sm text-ink-soft">{body}</p>
+          </div>
+        ))}
       </section>
     </div>
   );

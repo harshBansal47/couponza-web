@@ -18,6 +18,7 @@ const PLEDGES = [
   {
     title: "We disclose what we earn, on the page itself",
     body: "If a deal pays us a commission, that's stated on its page — not buried in a footer. It never changes the price you pay.",
+    id: "commissions",
   },
   {
     title: "We never touch another creator's referral link",
@@ -46,7 +47,7 @@ export default async function TrustPage() {
 
       <div className="mt-10 space-y-8">
         {PLEDGES.map((pledge) => (
-          <div key={pledge.title} className="border-t border-ledger-line pt-6">
+          <div key={pledge.title} id={"id" in pledge ? (pledge as { id?: string }).id : undefined} className="border-t border-ledger-line pt-6">
             <h2 className="font-serif text-xl text-ink">{pledge.title}</h2>
             <p className="mt-2 leading-relaxed text-ink-soft">{pledge.body}</p>
           </div>

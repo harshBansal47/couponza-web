@@ -22,6 +22,17 @@
   --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
   --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
+
+  /* Radius scale (deliberately small — ledger/paper, not bubbles). */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* Shadow scale: hairline and subtle, never dramatic. */
+  --shadow-hairline: 0 1px 0 rgba(34, 38, 31, 0.06);
+  --shadow-raised: 0 2px 8px rgba(34, 38, 31, 0.08);
+  --shadow-overlay: 0 8px 24px rgba(34, 38, 31, 0.12);
 }
 
 :root {
@@ -32,6 +43,48 @@ body {
   background-color: var(--color-paper);
   color: var(--color-ink);
 }
+
+/* Button variants — one place, so every CTA on the site reads the same. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+  cursor: pointer;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+.btn-primary:hover:not(:disabled) { background: transparent; color: var(--color-ink); }
+.btn-outline { background: transparent; color: var(--color-ink); border-color: var(--color-ink); }
+.btn-outline:hover:not(:disabled) { background: var(--color-ink); color: var(--color-paper); }
+.btn-ghost { background: transparent; color: var(--color-ink-soft); }
+.btn-ghost:hover:not(:disabled) { color: var(--color-ink); }
+.btn-verified { background: var(--color-verified); color: var(--color-paper); border-color: var(--color-verified); }
+.btn-verified:hover:not(:disabled) { opacity: 0.9; }
+
+/* Inputs share one look across the site. */
+.input {
+  width: 100%;
+  border: 1px solid var(--color-ledger-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper-raised);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-inkblue);
+}
+.input::placeholder { color: var(--color-ink-soft); }
+.input[aria-invalid="true"] { border-color: var(--color-rust); }
+
 
 @media (prefers-reduced-motion: reduce) {
   *,
