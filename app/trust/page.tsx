@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { api, ApiError } from "@/lib/api";
+import { ApiError, resilient } from "@/lib/api";
 
 import { absoluteUrl } from "@/lib/seo";
 
@@ -28,7 +28,7 @@ const PLEDGES = [
 
 async function loadExtendedPolicy() {
   try {
-    return await api.getPageBySlug("trust-center");
+    return await resilient.getPageBySlug("trust-center");
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return null;
     throw err;

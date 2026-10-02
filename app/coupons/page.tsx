@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { api } from "@/lib/api";
+import { resilient } from "@/lib/api";
 import CategoryChips from "@/components/CategoryChips";
 import CouponRow from "@/components/CouponRow";
 import Pagination from "@/components/Pagination";
@@ -25,9 +25,9 @@ export default async function CouponsPage({
   const skip = Math.max(Number(skipParam) || 0, 0);
 
   const [couponsPage, categoriesPage, storesPage] = await Promise.all([
-    api.listCoupons({ search: query, skip, limit: PAGE_SIZE, category_id }),
-    api.listCategories({ limit: 100 }),
-    api.listStores({ limit: 100 }),
+    resilient.listCoupons({ search: query, skip, limit: PAGE_SIZE, category_id }),
+    resilient.listCategories({ limit: 100 }),
+    resilient.listStores({ limit: 100 }),
   ]);
   const storeById = new Map(storesPage.items.map((s) => [s.id, s]));
 

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { api } from "@/lib/api";
+import { resilient } from "@/lib/api";
 import type { CouponPublic } from "@/lib/types";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -20,9 +20,9 @@ function couponPriority(coupon: CouponPublic): number {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [coupons, stores, categories] = await Promise.all([
-    api.listCoupons({ limit: 100 }),
-    api.listStores({ limit: 100 }),
-    api.listCategories(),
+    resilient.listCoupons({ limit: 100 }),
+    resilient.listStores({ limit: 100 }),
+    resilient.listCategories(),
   ]);
 
   return [

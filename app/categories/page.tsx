@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { resilient } from "@/lib/api";
 import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CategoriesIndexPage() {
-  const { items } = await api.listCategories({ limit: 100 });
+  const { items } = await resilient.listCategories({ limit: 100 });
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="mb-8 font-serif text-3xl text-ink">Categories</h1>

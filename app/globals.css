@@ -118,24 +118,17 @@ body {
   background-repeat: repeat-x;
 }
 
-/* Safe area insets for mobile */
-:root {
-  --safe-area-inset-top: env(safe-area-inset-top, 0);
-  --safe-area-inset-right: env(safe-area-inset-right, 0);
-  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
-  --safe-area-inset-left: env(safe-area-inset-left, 0);
-}
-
-/* Mobile-first responsive utilities */
-.container {
-  @apply mx-auto max-w-5xl px-4 sm:px-6;
-}
-
+/*
+  Mobile ergonomics. Plain CSS rather than @apply on purpose: these are
+  cross-cutting utilities, and @apply inside @layer utilities is fragile.
+*/
 @layer utilities {
+  /* Minimum 44x44px hit area (WCAG 2.5.5 target size) for icon-only controls. */
   .touch-target {
-    @apply min-h-[44px] min-w-[44px];
+    min-height: 44px;
+    min-width: 44px;
   }
-  
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -143,21 +136,33 @@ body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   .text-balance {
     text-wrap: balance;
   }
-  
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Keep pull-to-refresh and rubber-banding out of nested scroll areas. */
+  .overscroll-contain-y {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Respect the home indicator on fixed mobile UI. */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   .animate-fade-in {
-    animation: fadeIn 200ms ease-out;
+    animation: fadeIn 200ms ease-out both;
   }
-  
   .animate-slide-up {
-    animation: slideUp 300ms ease-out;
+    animation: slideUp 240ms ease-out both;
   }
-  
   .animate-slide-down {
-    animation: slideDown 200ms ease-out;
+    animation: slideDown 200ms ease-out both;
   }
 }
 
@@ -176,39 +181,26 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile-specific adjustments */
+/* On phones, bump controls to a comfortable thumb height. */
 @media (max-width: 640px) {
-  .mobile-full-width {
-    @apply w-full;
+  .btn,
+  .input,
+  select {
+    min-height: 44px;
   }
-  
-  .mobile-stack {
-    @apply flex-col;
-  }
-  
-  .mobile-text-center {
-    @apply text-center;
-  }
-  
-  /* Larger touch targets on mobile */
-  .btn, .input, select {
-    @apply min-h-[44px];
-  }
-  
-  /* Adjust modal for mobile */
-  .modal-mobile {
-    @apply m-0 rounded-none max-h-screen;
+  .btn {
+    padding: 0.625rem 1rem;
   }
 }
 
-/* Tablet adjustments */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .tablet-grid-2 {
-    @apply grid-cols-2;
+/* Long admin-entered store/product names and promo codes must never widen a
+   card past its grid cell. */
+@layer components {
+  .break-anywhere {
+    overflow-wrap: anywhere;
   }
 }
 
-/* Print styles */
 @media print {
   .no-print {
     display: none !important;

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { resilient } from "@/lib/api";
 import CouponRow from "@/components/CouponRow";
 import SectionTitle from "@/components/SectionTitle";
 import { absoluteUrl } from "@/lib/seo";
@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 
 export default async function DealsPage() {
   const [couponsPage, productsPage, storesPage] = await Promise.all([
-    api.listCoupons({ limit: 50 }),
-    api.listProducts({ limit: 50 }),
-    api.listStores({ limit: 100 }),
+    resilient.listCoupons({ limit: 50 }),
+    resilient.listProducts({ limit: 50 }),
+    resilient.listStores({ limit: 100 }),
   ]);
   const storeById = new Map(storesPage.items.map((s) => [s.id, s]));
 

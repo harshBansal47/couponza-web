@@ -1,18 +1,33 @@
 "use client";
 
-import { createContext, useContext, useCallback, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type ToastType = "default" | "success" | "error" | "warning" | "info";
 
-interface Toast {
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
+export interface ToastOptions {
+  type?: ToastType;
+  /** Auto-dismiss delay in ms. `0` keeps the toast up until dismissed. */
+  duration?: number;
+  action?: ToastAction;
+}
+
+interface Toast extends Required<Omit<ToastOptions, "action">> {
   id: number;
   message: string;
-  type: ToastType;
-  duration?: number;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
+  action?: ToastAction;
 }
 
 interface ToastContextValue {
@@ -20,112 +35,145 @@ interface ToastContextValue {
   dismiss: (id: number) => void;
 }
 
-interface ToastOptions {
-  type?: ToastType;
-  duration?: number;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
-}
-
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-export function useToast() {
+/** Must be called inside <ToastProvider> — the root layout already wraps the app. */
+export function useToast(): ToastContextValue {
   const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider");
-  }
+  if (!context) throw new Error("useToast must be used within a ToastProvider");
   return context;
 }
+
+const DEFAULT_DURATION = 3000;
+/** Errors stay longer: they usually carry something the reader needs time for. */
+const ERROR_DURATION = 6000;
 
 const typeStyles: Record<ToastType, string> = {
   default: "border-ink bg-ink text-paper",
   success: "border-verified bg-verified-soft text-verified",
   error: "border-rust bg-rust-soft text-rust",
-  warning: "border-[var(--color-rust)] bg-rust-soft text-rust",
-  info: "border-inkblue bg-[var(--color-inkblue)]/10 text-inkblue",
+  warning: "border-rust bg-rust-soft text-rust",
+  info: "border-inkblue bg-inkblue/10 text-inkblue",
 };
 
 const typeIcons: Record<ToastType, string> = {
   default: "",
   success: "✓",
   error: "✕",
-  warning: "⚠",
-  info: "ℹ",
+  warning: "!",
+  info: "i",
 };
+
+function ToastRow({ toast, onDismiss }: { toast: Toast; onDismiss: (id: number) => void }) {
+  // Hovering or focusing a toast pauses its countdown, so the message stays
+  // readable while someone reaches for the action button.
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused || toast.duration <= 0) return;
+    const timer = setTimeout(() => onDismiss(toast.id), toast.duration);
+    return () => clearTimeout(timer);
+  }, [paused, toast.id, toast.duration, onDismiss]);
+
+  return (
+    <div
+      data-toast-id={toast.id}
+      className={`pointer-events-auto flex max-w-md items-center gap-3 rounded-sm border px-4 py-3 text-sm shadow-[var(--shadow-overlay)] ${typeStyles[toast.type]}`}
+      role={toast.type === "error" ? "alert" : "status"}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      {typeIcons[toast.type] && (
+        <span aria-hidden="true" className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-current font-mono text-[10px]">
+          {typeIcons[toast.type]}
+        </span>
+      )}
+      <p className="flex-1">{toast.message}</p>
+      {toast.action && (
+        <button
+          type="button"
+          onClick={() => {
+            toast.action?.onClick();
+            onDismiss(toast.id);
+          }}
+          className="shrink-0 underline underline-offset-2 hover:no-underline"
+        >
+          {toast.action.label}
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={() => onDismiss(toast.id)}
+        className="shrink-0 opacity-50 transition-opacity hover:opacity-100"
+        aria-label="Dismiss notification"
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
 
 export default function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const push = useCallback((message: string, options: ToastOptions = {}) => {
-    const id = Date.now() + Math.random();
-    const toast: Toast = {
-      id,
-      message,
-      type: options.type ?? "default",
-      duration: options.duration ?? (options.type === "error" ? 5000 : 3000),
-      action: options.action,
-    };
-    setToasts((t) => [...t, toast]);
-    if (toast.duration > 0) {
-      setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), toast.duration);
-    }
-  }, []);
-
   const dismiss = useCallback((id: number) => {
-    setToasts((t) => t.filter((x) => x.id !== id));
+    setToasts((current) => current.filter((t) => t.id !== id));
   }, []);
 
-  const value = useMemo(() => ({ toast: push, dismiss }), [push, dismiss]);
+  const toast = useCallback(
+    (message: string, options: ToastOptions = {}) => {
+      const id = Date.now() + Math.random();
+      const type = options.type ?? "default";
+      setToasts((current) => [
+        ...current,
+        {
+          id,
+          message,
+          type,
+          duration: options.duration ?? (type === "error" ? ERROR_DURATION : DEFAULT_DURATION),
+          action: options.action,
+        },
+      ]);
+    },
+    [],
+  );
+
+  const value = useMemo<ToastContextValue>(() => ({ toast, dismiss }), [toast, dismiss]);
 
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div aria-live="polite" aria-atomic="true" className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2 pointer-events-none">
+      <div
+        aria-live="polite"
+        aria-atomic="false"
+        className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4 sm:bottom-6"
+      >
         {toasts.map((t) => (
-          <div
-            key={t.id}
-            className={`pointer-events-auto flex items-center gap-3 rounded-sm border px-4 py-3 text-sm max-w-md shadow-[var(--shadow-overlay)] ${typeStyles[t.type]}`}
-            role="alert"
-            aria-live="assertive"
-          >
-            {typeIcons[t.type] && <span className="shrink-0 font-medium" aria-hidden="true">{typeIcons[t.type]}</span>}
-            <p className="flex-1">{t.message}</p>
-            {t.action && (
-              <button
-                onClick={() => {
-                  t.action.onClick();
-                  dismiss(t.id);
-                }}
-                className="shrink-0 underline underline-offset-2 hover:no-underline"
-              >
-                {t.action.label}
-              </button>
-            )}
-            <button
-              onClick={() => dismiss(t.id)}
-              className="shrink-0 opacity-50 hover:opacity-100 transition-opacity"
-              aria-label="Dismiss"
-            >
-              ✕
-            </button>
-          </div>
+          <ToastRow key={t.id} toast={t} onDismiss={dismiss} />
         ))}
       </div>
     </ToastContext.Provider>
   );
 }
 
-/** Convenience helpers for common toast types */
+/** Same context, with the type pre-filled. */
 export function useTypedToast() {
   const { toast, dismiss } = useToast();
-  return {
-    toast,
-    dismiss,
-    success: (message: string, options?: Omit<ToastOptions, "type">) => toast(message, { ...options, type: "success" }),
-    error: (message: string, options?: Omit<ToastOptions, "type">) => toast(message, { ...options, type: "error" }),
-    warning: (message: string, options?: Omit<ToastOptions, "type">) => toast(message, { ...options, type: "warning" }),
-    info: (message: string, options?: Omit<ToastOptions, "type">) => toast(message, { ...options, type: "info" }),
-  };
+  return useMemo(
+    () => ({
+      toast,
+      dismiss,
+      success: (message: string, options?: Omit<ToastOptions, "type">) =>
+        toast(message, { ...options, type: "success" }),
+      error: (message: string, options?: Omit<ToastOptions, "type">) =>
+        toast(message, { ...options, type: "error" }),
+      warning: (message: string, options?: Omit<ToastOptions, "type">) =>
+        toast(message, { ...options, type: "warning" }),
+      info: (message: string, options?: Omit<ToastOptions, "type">) =>
+        toast(message, { ...options, type: "info" }),
+    }),
+    [toast, dismiss],
+  );
 }

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { api, ApiError } from "@/lib/api";
+import { ApiError, resilient } from "@/lib/api";
 import { formatDiscount, successRateLabel } from "@/lib/format";
 import { loadOgFonts } from "@/lib/og-fonts";
 
@@ -23,10 +23,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   let rate: string | null = null;
 
   try {
-    const coupon = await api.getCouponBySlug(slug);
-    const store = await api.getStoreById(coupon.store_id);
+    const coupon = await resilient.getCouponBySlug(slug);
+    if (!coupon) throw new ApiError("Coupon not found", 404);
+    const store = await resilient.getStoreById(coupon.store_id);
     title = coupon.title;
-    storeName = store.name;
+    storeName = store?.name ?? "";
     discount = formatDiscount(coupon);
     rate = successRateLabel(coupon);
   } catch (err) {

@@ -1,270 +1,282 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback, type ReactNode, type KeyboardEvent, type MouseEvent } from "react";
+import {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  type ReactNode,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import { createPortal } from "react-dom";
+import { Input } from "./Input";
 
-interface DropdownOption {
-  value: string;
-  label: string;
-  icon?: ReactNode;
-  disabled?: boolean;
-  divider?: boolean;
-  sectionTitle?: string;
-}
+export type DropdownOption =
+  | { value: string; label: string; icon?: ReactNode; disabled?: boolean }
+  | { divider: true }
+  | { sectionTitle: string };
 
 interface DropdownProps {
-  trigger: ReactNode;
+  /** Rendered as the trigger. Can be a node or a render function receiving open state. */
+  trigger: ReactNode | ((state: { open: boolean; toggle: () => void }) => ReactNode);
   options: DropdownOption[];
   onSelect?: (value: string, label: string) => void;
-  placeholder?: string;
-  value?: string;
-  disabled?: boolean;
   searchable?: boolean;
+  searchPlaceholder?: string;
   maxHeight?: number;
   align?: "left" | "right";
   closeOnSelect?: boolean;
+  disabled?: boolean;
+  emptyMessage?: string;
+  className?: string;
+  /** Width of the menu panel, e.g. "12rem". */
+  width?: string;
+}
+
+function isSelectable(opt: DropdownOption): opt is { value: string; label: string; icon?: ReactNode; disabled?: boolean } {
+  return !("divider" in opt) && !("sectionTitle" in opt);
 }
 
 export function Dropdown({
   trigger,
   options,
   onSelect,
-  placeholder,
-  value,
-  disabled = false,
   searchable = false,
+  searchPlaceholder = "Filter…",
   maxHeight = 280,
   align = "left",
   closeOnSelect = true,
+  disabled = false,
+  emptyMessage = "No matches",
+  className = "",
+  width,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  // The menu is portalled and fixed-positioned, so its placement has to be
+  // measured after it opens. Reading the trigger's rect during render would be
+  // a ref access mid-render, which React does not allow.
+  const [placement, setPlacement] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
-  const filteredOptions = options.filter((opt) => {
-    if (opt.divider || opt.sectionTitle) return true;
-    return opt.label.toLowerCase().includes(searchQuery.toLowerCase());
+  const query = searchQuery.trim().toLowerCase();
+
+  const visibleOptions: DropdownOption[] = options.filter((opt) => {
+    if (!isSelectable(opt)) return true;
+    if (opt.disabled) return true;
+    if (!query) return true;
+    return opt.label.toLowerCase().includes(query);
   });
 
-  const selectableOptions = filteredOptions.filter((opt) => !opt.divider && !opt.sectionTitle && !opt.disabled);
+  const selectableOptions = visibleOptions.filter(
+    (opt): opt is { value: string; label: string; icon?: ReactNode; disabled?: boolean } =>
+      isSelectable(opt) && !opt.disabled
+  );
 
-  useEffect(() => {
+  /**
+   * Whether the menu is effectively empty. Dividers and section headers always
+   * survive filtering, so checking `visibleOptions` would leave a bare rule
+   * hanging under the search box instead of the empty message.
+   */
+  const isEmpty = visibleOptions.every((opt) => !isSelectable(opt));
+
+  const close = useCallback(() => {
+    setOpen(false);
     setActiveIndex(-1);
-  }, [open, searchQuery]);
+  }, []);
+  const toggle = useCallback(() => {
+    setOpen((o) => !o);
+    setActiveIndex(-1);
+  }, []);
 
   useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (!open) return;
+    if (!open) return;
+    function onKeyDown(e: globalThis.KeyboardEvent) {
       if (e.key === "Escape") {
-        setOpen(false);
+        e.preventDefault();
+        close();
         triggerRef.current?.focus();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
-        setActiveIndex((i) => Math.min(i + 1, selectableOptions.length - 1));
+        setActiveIndex((i) => (selectableOptions.length === 0 ? -1 : (i + 1) % selectableOptions.length));
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setActiveIndex((i) => Math.max(i - 1, -1));
+        setActiveIndex((i) => (selectableOptions.length === 0 ? -1 : (i - 1 + selectableOptions.length) % selectableOptions.length));
       } else if (e.key === "Enter" || e.key === " ") {
+        if (activeIndex < 0) return;
         e.preventDefault();
-        if (activeIndex >= 0) {
-          const opt = selectableOptions[activeIndex];
+        const opt = selectableOptions[activeIndex];
+        if (opt) {
           onSelect?.(opt.value, opt.label);
-          if (closeOnSelect) setOpen(false);
+          if (closeOnSelect) close();
         }
       } else if (e.key === "Tab") {
-        setOpen(false);
+        close();
       }
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, activeIndex, selectableOptions, onSelect, closeOnSelect]);
+  }, [open, activeIndex, selectableOptions, onSelect, closeOnSelect, close]);
 
   useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (triggerRef.current && !triggerRef.current.contains(e.target as Node)) {
-        if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-          setOpen(false);
-        }
-      }
+    if (!open) return;
+    function onPointerDown(e: MouseEvent) {
+      const target = e.target as Node;
+      if (wrapperRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      close();
     }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [open, close]);
 
   useEffect(() => {
-    if (open && searchable && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
+    if (open && searchable) searchInputRef.current?.focus();
   }, [open, searchable]);
 
+  useEffect(() => {
+    if (!open) return;
+    setPlacement(positionMenu(triggerRef.current, align));
+
+    function onReposition() {
+      setPlacement(positionMenu(triggerRef.current, align));
+    }
+    window.addEventListener("resize", onReposition);
+    window.addEventListener("scroll", onReposition, true);
+    return () => {
+      window.removeEventListener("resize", onReposition);
+      window.removeEventListener("scroll", onReposition, true);
+    };
+  }, [open, align]);
+
+  useEffect(() => {
+    if (!open) return;
+    const { style } = document.body;
+    const previous = style.overflow;
+    style.overflow = "hidden";
+    return () => {
+      style.overflow = previous;
+    };
+  }, [open]);
+
   function handleOptionClick(opt: DropdownOption) {
-    if (opt.disabled || opt.divider || opt.sectionTitle) return;
+    if (!isSelectable(opt) || opt.disabled) return;
     onSelect?.(opt.value, opt.label);
-    if (closeOnSelect) setOpen(false);
+    if (closeOnSelect) close();
   }
 
-  const triggerElement = typeof trigger === "function" ? trigger({ open, onClick: () => !disabled && setOpen((o) => !o) }) : (
-    <div
-      ref={triggerRef}
-      onClick={() => !disabled && setOpen((o) => !o)}
-      onKeyDown={(e) => {
-        if ((e.key === "Enter" || e.key === " " || e.key === "ArrowDown") && !open) {
-          e.preventDefault();
-          setOpen(true);
-        }
-      }}
-      tabIndex={0}
-      role="combobox"
-      aria-expanded={open}
-      aria-haspopup="listbox"
-      aria-disabled={disabled}
-      className="cursor-pointer"
-    >
-      {trigger}
-    </div>
-  );
-
-  if (!open) return <>{triggerElement}</>;
-
-  const menuContent = (
-    <div
-      ref={menuRef}
-      role="listbox"
-      className="absolute z-50 min-w-[200px] max-h-[280px] overflow-auto border border-ledger-line bg-paper-raised shadow-[var(--shadow-overlay)] rounded-sm mt-1"
-      style={{
-        maxHeight,
-        [align === "left" ? "left" : "right"]: 0,
-      }}
-    >
-      {searchable && (
-        <div className="p-2 border-b border-ledger-line sticky top-0 bg-paper-raised">
-          <Input
-            ref={searchInputRef}
-            type="search"
-            placeholder="Search…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="text-sm"
-            aria-label="Filter options"
-          />
-        </div>
-      )}
-      {filteredOptions.map((opt, i) => {
-        if (opt.divider) {
-          return <div key={`divider-${i}`} className="border-t border-ledger-line my-1" role="separator" />;
-        }
-        if (opt.sectionTitle) {
-          return (
-            <div key={`section-${i}`} className="px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-soft">
-              {opt.sectionTitle}
-            </div>
-          );
-        }
-        const isActive = selectableOptions.findIndex((o) => o.value === opt.value) === activeIndex;
-        return (
-          <div
-            key={opt.value}
-            role="option"
-            aria-selected={isActive}
-            aria-disabled={opt.disabled}
-            className={`px-3 py-2 text-sm cursor-pointer transition-colors ${isActive ? "bg-ledger-line/40" : ""} ${opt.disabled ? "opacity-40 cursor-not-allowed" : ""}`}
-            onClick={() => handleOptionClick(opt)}
-            onMouseEnter={() => setActiveIndex(selectableOptions.findIndex((o) => o.value === opt.value))}
-          >
-            <div className="flex items-center gap-2">
-              {opt.icon && <span aria-hidden="true">{opt.icon}</span>}
-              <span>{opt.label}</span>
-            </div>
-          </div>
-        );
-      })}
-      {selectableOptions.length === 0 && (
-        <div className="px-3 py-4 text-center text-sm text-ink-soft">No options found</div>
-      )}
-    </div>
-  );
+  const triggerContent =
+    typeof trigger === "function"
+      ? trigger({ open, toggle })
+      : (trigger as ReactNode);
 
   return (
-    <>
-      {triggerElement}
-      {createPortal(menuContent, document.body)}
-    </>
-  );
-}
-
-/** Simpler Select-style dropdown for form inputs */
-interface SelectDropdownProps {
-  label?: string;
-  error?: string;
-  hint?: string;
-  placeholder?: string;
-  value?: string;
-  onChange?: (value: string) => void;
-  options: { value: string; label: string; disabled?: boolean }[];
-  disabled?: boolean;
-  required?: boolean;
-  name?: string;
-  id?: string;
-  fullWidth?: boolean;
-}
-
-export function SelectDropdown({
-  label,
-  error,
-  hint,
-  placeholder,
-  value,
-  onChange,
-  options,
-  disabled = false,
-  required = false,
-  name,
-  id,
-  fullWidth = true,
-}: SelectDropdownProps) {
-  const selectId = id || `select-${Math.random().toString(36).slice(2, 9)}`;
-  const errorId = error ? `${selectId}-error` : undefined;
-  const hintId = hint ? `${selectId}-hint` : undefined;
-
-  return (
-    <div className={`${fullWidth ? "w-full" : ""}`}>
-      {label && (
-        <label htmlFor={selectId} className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-ink-soft">
-          {label}
-          {required && <span className="ml-1 text-rust" aria-hidden="true">*</span>}
-        </label>
-      )}
-      <select
-        id={selectId}
-        name={name}
-        value={value ?? ""}
-        onChange={(e) => onChange?.(e.target.value)}
-        disabled={disabled}
-        required={required}
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
-        className="input appearance-none bg-no-repeat bg-right pr-10"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23565c4e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-          backgroundPosition: "right 0.75rem center",
+    <div ref={wrapperRef} className={`relative ${className}`}>
+      <div
+        ref={triggerRef}
+        onClick={() => !disabled && toggle()}
+        onKeyDown={(e: ReactKeyboardEvent) => {
+          if (!disabled && (e.key === "Enter" || e.key === " " || e.key === "ArrowDown")) {
+            e.preventDefault();
+            setOpen(true);
+          }
         }}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-disabled={disabled || undefined}
+        className={disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
       >
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
+        {triggerContent}
+      </div>
+
+      {open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="listbox"
+            aria-label="Options"
+            className="fixed z-[60] min-w-[12rem] overflow-auto rounded-sm border border-ledger-line bg-paper-raised shadow-[var(--shadow-overlay)]"
+            style={{
+              maxHeight,
+              width,
+              minWidth: width,
+              top: placement.top,
+              left: placement.left,
+            }}
+          >
+            {searchable && (
+              <div className="sticky top-0 border-b border-ledger-line bg-paper-raised p-2">
+                <Input
+                  ref={searchInputRef}
+                  type="search"
+                  size="sm"
+                  placeholder={searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setActiveIndex(-1);
+                  }}
+                  aria-label="Filter options"
+                />
+              </div>
+            )}
+            {isEmpty ? (
+              <p className="px-3 py-4 text-center text-sm text-ink-soft">{emptyMessage}</p>
+            ) : (
+              visibleOptions.map((opt, i) => {
+                if ("divider" in opt) {
+                  return <div key={`divider-${i}`} role="separator" className="my-1 border-t border-ledger-line" />;
+                }
+                if ("sectionTitle" in opt) {
+                  return (
+                    <div
+                      key={`section-${i}`}
+                      className="px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-soft"
+                    >
+                      {opt.sectionTitle}
+                    </div>
+                  );
+                }
+                const selectableIndex = selectableOptions.findIndex((o) => o.value === opt.value);
+                const isActive = selectableIndex === activeIndex;
+                return (
+                  <div
+                    key={opt.value}
+                    role="option"
+                    aria-selected={isActive}
+                    aria-disabled={opt.disabled || undefined}
+                    onClick={() => handleOptionClick(opt)}
+                    onMouseEnter={() => !opt.disabled && setActiveIndex(selectableIndex)}
+                    className={[
+                      "flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-ink transition-colors",
+                      isActive ? "bg-ledger-line/50" : "",
+                      opt.disabled ? "cursor-not-allowed opacity-40" : "hover:bg-ledger-line/30",
+                    ].join(" ")}
+                  >
+                    {opt.icon && <span aria-hidden="true">{opt.icon}</span>}
+                    <span className="truncate">{opt.label}</span>
+                  </div>
+                );
+              })
+            )}
+          </div>,
+          document.body
         )}
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value} disabled={opt.disabled}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      {error && <p id={errorId} className="mt-1.5 text-sm text-rust" role="alert">{error}</p>}
-      {hint && !error && <p id={hintId} className="mt-1.5 text-sm text-ink-soft">{hint}</p>}
     </div>
   );
 }
+
+function positionMenu(anchor: HTMLElement | null, align: "left" | "right"): { top: number; left: number } {
+  if (!anchor || typeof window === "undefined") return { top: 0, left: 0 };
+  const rect = anchor.getBoundingClientRect();
+  const top = Math.min(rect.bottom + 4, window.innerHeight - 16);
+  return align === "left"
+    ? { top, left: rect.left }
+    : { top, left: Math.max(8, rect.right - (anchor.offsetWidth || 200)) };
+}
+
+export default Dropdown;

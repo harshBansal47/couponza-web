@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { api, ApiError } from "@/lib/api";
+import { ApiError, resilient } from "@/lib/api";
 import CategoryChips from "@/components/CategoryChips";
 import CouponRow from "@/components/CouponRow";
 import Pagination from "@/components/Pagination";
@@ -13,7 +13,7 @@ type SearchParams = Promise<{ skip?: string }>;
 
 async function loadCategory(slug: string) {
   try {
-    return await api.getCategoryBySlug(slug);
+    return await resilient.getCategoryBySlug(slug);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return null;
     throw err;
@@ -49,9 +49,9 @@ export default async function CategoryPage({
   if (!category) notFound();
 
   const [coupons, categories, stores] = await Promise.all([
-    api.listCoupons({ category_id: category.id, skip, limit: PAGE_SIZE }),
-    api.listCategories(),
-    api.listStores({ limit: 100 }),
+    resilient.listCoupons({ category_id: category.id, skip, limit: PAGE_SIZE }),
+    resilient.listCategories(),
+    resilient.listStores({ limit: 100 }),
   ]);
   const storeById = new Map(stores.items.map((s) => [s.id, s]));
 

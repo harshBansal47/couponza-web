@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { api, ApiError } from "@/lib/api";
+import { ApiError, resilient } from "@/lib/api";
 import CouponCodePanel from "@/components/CouponCodePanel";
 import VerifyWidget from "@/components/VerifyWidget";
 import DisclosureNote from "@/components/DisclosureNote";
@@ -12,7 +12,7 @@ import Image from "next/image";
 
 async function loadCoupon(slug: string): Promise<CouponPublic | null> {
   try {
-    return await api.getCouponBySlug(slug);
+    return await resilient.getCouponBySlug(slug);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return null;
     throw err;
@@ -21,7 +21,7 @@ async function loadCoupon(slug: string): Promise<CouponPublic | null> {
 
 async function loadStore(storeId: string): Promise<Store | null> {
   try {
-    return await api.getStoreById(storeId);
+    return await resilient.getStoreById(storeId);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return null;
     throw err;
@@ -30,7 +30,7 @@ async function loadStore(storeId: string): Promise<Store | null> {
 
 async function loadRelatedCoupons(couponId: string, storeId: string): Promise<CouponPublic[]> {
   try {
-    const res = await api.listCoupons({ store_id: storeId, limit: 10 });
+    const res = await resilient.listCoupons({ store_id: storeId, limit: 10 });
     return res.items.filter((c) => c.id !== couponId).slice(0, 4);
   } catch {
     return [];
@@ -39,7 +39,7 @@ async function loadRelatedCoupons(couponId: string, storeId: string): Promise<Co
 
 async function loadVerificationHistory(couponId: string) {
   try {
-    return await api.getCouponVerificationHistory(couponId);
+    return await resilient.getCouponVerificationHistory(couponId);
   } catch {
     return [];
   }
@@ -213,7 +213,7 @@ export default async function CouponDetailPage({ params }: { params: Params }) {
               </div>
               <div className="flex justify-between text-xs text-ink-soft font-mono">
                 <span>Worked: {coupon.success_count}</span>
-                <span>Didn't work: {coupon.fail_count}</span>
+                <span>Did not work: {coupon.fail_count}</span>
               </div>
             </div>
           </div>

@@ -26,10 +26,23 @@ export interface Store {
   description: string | null;
   is_active: boolean;
   commission_disclosure: string | null;
+  /** ISO 3166-1 alpha-2 market this store belongs to; null for global retailers. */
+  country_code: string | null;
+  /** ISO 4217 code used to render this store's prices. */
+  currency: string | null;
   created_at: string;
 }
 
 export type DiscountType = "percentage" | "fixed" | "deal";
+
+/**
+ * A product joined with its current price context. The account dashboard needs
+ * a tracked product's current price to show "now vs target", which the bare
+ * tracked-products endpoint doesn't return.
+ */
+export interface TrackedProductView extends TrackedProduct {
+  product: Product;
+}
 
 // The public-safe view — deliberately has no destination_url. See
 // couponza/app/schemas/coupon_public.py: the real URL is only ever
@@ -66,6 +79,7 @@ export interface VerificationHistoryItem {
   id: string;
   worked: boolean;
   created_at: string;
+  /** Reporter's own words. Backend never returns ip_hash. */
   note: string | null;
 }
 
@@ -110,4 +124,62 @@ export interface CmsPage {
   meta_description: string | null;
   is_published: boolean;
   created_at: string;
+}
+
+// ---- Account: mirrors couponza/app/schemas/{user,tracking}.py ----
+
+export type Role = "user" | "editor" | "admin";
+
+export interface User {
+  id: string;
+  email: string;
+  full_name: string | null;
+  role: Role;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface TokenPair {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
+
+export interface SavedItem {
+  kind: "store" | "coupon";
+  item_id: string;
+  saved_id: string;
+}
+
+export type AlertKind = "price_drop" | "coupon_appeared" | "target_met";
+
+export interface TrackedProduct {
+  id: string;
+  product_id: string;
+  target_price: number | null;
+  created_at: string;
+}
+
+export interface NotificationPreference {
+  email_enabled: boolean;
+  telegram_enabled: boolean;
+  telegram_chat_id: string | null;
+  push_enabled: boolean;
+  push_subscription: Record<string, unknown> | null;
+}
+
+export interface AlertEvent {
+  id: string;
+  kind: AlertKind;
+  message: string;
+  product_id: string | null;
+  coupon_id: string | null;
+  sent_at: string | null;
+  created_at: string;
+}
+
+export interface AutocompleteResult {
+  stores: string[];
+  categories: string[];
+  products: string[];
 }

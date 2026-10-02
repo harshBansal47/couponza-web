@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { resilient } from "@/lib/api";
 import EmptyState from "@/components/EmptyState";
 import { absoluteUrl } from "@/lib/seo";
 
@@ -16,7 +16,7 @@ export default async function StoresIndexPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { q } = await searchParams;
-  const { items } = await api.listStores({ search: q, limit: 100 });
+  const { items } = await resilient.listStores({ search: q, limit: 100 });
 
   const groups = new Map<string, typeof items>();
   for (const store of items) {
