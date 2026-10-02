@@ -7,6 +7,7 @@ import type {
   Product,
   Store,
   VerifyResponse,
+  VerificationHistoryItem,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
@@ -74,6 +75,11 @@ export const api = {
       cache: "no-store",
     }),
 
+  getCouponVerificationHistory: (couponId: string, limit = 50) =>
+    apiFetch<VerificationHistoryItem[]>(`/coupons/${couponId}/verification-history?limit=${limit}`, {
+      revalidate: 60,
+    }),
+
   goUrl: (couponId: string) => `${API_URL}/coupons/${couponId}/go`,
 
   listStores: (params: { search?: string; skip?: number; limit?: number } = {}) =>
@@ -84,11 +90,17 @@ export const api = {
   getStoreBySlug: (slug: string) =>
     apiFetch<Store>(`/stores/by-slug/${encodeURIComponent(slug)}`, { revalidate: 300 }),
 
+  autocompleteStores: (query: string, limit = 10) =>
+    apiFetch<string[]>(`/stores/autocomplete?q=${encodeURIComponent(query)}&limit=${limit}`, { revalidate: 300 }),
+
   listCategories: (params: { parent_id?: string; limit?: number; skip?: number } = {}) =>
     apiFetch<Paginated<Category>>(`/categories${qs(params)}`, { revalidate: 300 }),
 
   getCategoryBySlug: (slug: string) =>
     apiFetch<Category>(`/categories/by-slug/${encodeURIComponent(slug)}`, { revalidate: 300 }),
+
+  autocompleteCategories: (query: string, limit = 10) =>
+    apiFetch<string[]>(`/categories/autocomplete?q=${encodeURIComponent(query)}&limit=${limit}`, { revalidate: 300 }),
 
   getPageBySlug: (slug: string) =>
     apiFetch<CmsPage>(`/pages/by-slug/${encodeURIComponent(slug)}`, { revalidate: 300 }),

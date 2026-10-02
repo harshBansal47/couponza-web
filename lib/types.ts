@@ -62,6 +62,13 @@ export interface VerifyResponse {
   success_rate: number | null;
 }
 
+export interface VerificationHistoryItem {
+  id: string;
+  worked: boolean;
+  created_at: string;
+  note: string | null;
+}
+
 export interface Product {
   id: string;
   name: string;
