@@ -168,14 +168,57 @@ export interface NotificationPreference {
   push_subscription: Record<string, unknown> | null;
 }
 
+/**
+ * One delivery attempt, one channel.
+ *
+ * This is a row in the alert *history*, not the alert itself — hence one entry
+ * per channel per alert. `delivered` exists because the honest question a user
+ * asking "did you actually email me?" cannot be answered without it: an attempt
+ * that was recorded and an attempt that arrived are different facts, and only
+ * conflating them makes a bounced address look like a working one.
+ *
+ * `detail` is the alert's subject line, which carries the product and the new
+ * price. There is no separate `message` field; there never was one on the
+ * backend, and pretending otherwise is what made this interface lie.
+ */
 export interface AlertEvent {
   id: string;
   kind: AlertKind;
-  message: string;
-  product_id: string | null;
-  coupon_id: string | null;
-  sent_at: string | null;
+  channel: "email" | "push" | "telegram" | (string & {});
+  detail: string | null;
+  delivered: boolean;
+  price_point_id: string | null;
   created_at: string;
+}
+
+/** What the settings page needs to know about this device's push subscription. */
+export interface PushState {
+  push_enabled: boolean;
+  /** The API deliberately never echoes the subscription back; it is a credential. */
+  has_subscription: boolean;
+}
+
+/** The VAPID public key, plus whether push is configured on this deployment. */
+export interface PushPublicKey {
+  public_key: string | null;
+  enabled: boolean;
+}
+
+/**
+ * A browser Push API subscription.
+ *
+ * `PushSubscription.toJSON()` produces exactly this shape, so it can be sent
+ * straight through without reshaping. `expirationTime` is nullable and the keys
+ * are required — a subscription missing either key half parses fine as JSON and
+ * then fails inside the cryptography on every send.
+ */
+export interface PushSubscriptionPayload {
+  endpoint: string;
+  expirationTime?: number | null;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 }
 
 export interface AutocompleteResult {

@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AccountShell from "@/components/account/AccountShell";
 import NotificationSettings from "@/components/account/NotificationSettings";
-import { requireAccount, updatePreferencesAction } from "@/app/account/actions";
+import {
+  loadPushKey,
+  requireAccount,
+  subscribePushAction,
+  unsubscribePushAction,
+  updatePreferencesAction,
+} from "@/app/account/actions";
 import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -15,6 +21,17 @@ export const metadata: Metadata = {
 export default async function NotificationsPage() {
   const { user, prefs } = await requireAccount();
 
+  /*
+   * Read on the server rather than fetched from the client.
+   *
+   * The key has to reach the browser either way, but fetching it there means the
+   * push row renders as "unsupported", then "off", then "on" as three separate
+   * states on first paint. Deciding it server-side collapses that to one correct
+   * answer, and keeps the API as the single source of truth for a value that
+   * changes when someone rotates their VAPID keys.
+   */
+  const pushKey = await loadPushKey();
+
   return (
     <AccountShell user={user} active="/account/notifications">
       <h2 className="font-serif text-xl text-ink">Notifications</h2>
@@ -26,11 +43,17 @@ export default async function NotificationsPage() {
       <div className="mt-6 max-w-prose">
         <NotificationSettings
           action={updatePreferencesAction}
+          subscribeAction={subscribePushAction}
+          unsubscribeAction={unsubscribePushAction}
           initial={{
             email_enabled: prefs.email_enabled,
+            // The checkbox is gone; push state comes from the browser. Kept only
+            // so the Telegram row below can describe the account as a whole.
             push_enabled: prefs.push_enabled,
             telegram_enabled: prefs.telegram_enabled,
           }}
+          vapidKey={pushKey.public_key}
+          pushConfigured={pushKey.enabled}
           hasSession
         />
       </div>

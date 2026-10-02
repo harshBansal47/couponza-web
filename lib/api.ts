@@ -8,6 +8,9 @@ import type {
   Paginated,
   PricePoint,
   Product,
+  PushPublicKey,
+  PushState,
+  PushSubscriptionPayload,
   SavedItem,
   Store,
   TokenPair,
@@ -288,6 +291,35 @@ export const api = {
 
   listAlerts: (token: string, limit = 50) =>
     apiFetch<AlertEvent[]>(`/me/alerts${qs({ limit })}`, { token, cache: "no-store" }),
+
+  /**
+   * The VAPID public key, from the API rather than from a build-time env var.
+   *
+   * Two sources of truth for one key is a footgun: they drift, and the symptom
+   * is `subscribe()` throwing an opaque crypto error on exactly one deployment.
+   * It also carries `enabled`, which an env var cannot — the frontend needs to
+   * tell "push is off here" apart from "push is broken here", and only the
+   * backend knows which.
+   */
+  getPushPublicKey: () =>
+    apiFetch<PushPublicKey>("/me/push/key", { cache: "no-store" }),
+
+  /**
+   * Register this browser's subscription. Enables push as a side effect: the
+   * browser only produces a subscription after an explicit permission grant, so
+   * its arrival is the consent.
+   */
+  subscribePush: (token: string, subscription: PushSubscriptionPayload) =>
+    apiFetch<PushState>("/me/push/subscription", {
+      method: "PUT",
+      token,
+      body: JSON.stringify(subscription),
+      cache: "no-store",
+    }),
+
+  /** Forget this browser's subscription server-side. */
+  unsubscribePush: (token: string) =>
+    apiFetch<void>("/me/push/subscription", { method: "DELETE", token, cache: "no-store" }),
 };
 
 export { extractDetail };

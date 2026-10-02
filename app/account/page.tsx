@@ -31,7 +31,10 @@ export default async function AccountOverviewPage() {
   const resolvedStores = savedStores.filter((s) => s !== null);
   const resolvedCoupons = savedCoupons.filter((c) => c !== null);
 
-  const sentAlerts = alerts.filter((a) => a.sent_at !== null);
+  // Count distinct alerts, not delivery attempts. A user with email and push on
+  // got one price drop, not two — showing "2 alerts sent" for a single drop is
+  // the kind of small inaccuracy that makes a statistics panel untrustworthy.
+  const alertKeys = new Set(alerts.map((a) => a.price_point_id ?? a.id));
   const trackedWithPrices = await Promise.all(
     tracked.map(async (row) => ({
       row,
@@ -44,7 +47,7 @@ export default async function AccountOverviewPage() {
     { label: "Stores followed", value: resolvedStores.length, href: "/account/saved" },
     { label: "Codes saved", value: resolvedCoupons.length, href: "/account/saved" },
     { label: "Products tracked", value: liveProducts.length, href: "/account/products" },
-    { label: "Alerts sent", value: sentAlerts.length, href: "/account/alerts" },
+    { label: "Alerts", value: alertKeys.size, href: "/account/alerts" },
   ];
 
   return (
@@ -54,7 +57,7 @@ export default async function AccountOverviewPage() {
       counts={{
         "/account/saved": resolvedStores.length + resolvedCoupons.length,
         "/account/products": liveProducts.length,
-        "/account/alerts": sentAlerts.length,
+        "/account/alerts": alertKeys.size,
       }}
     >
       <h2 className="font-serif text-xl text-ink">Overview</h2>
@@ -92,7 +95,7 @@ export default async function AccountOverviewPage() {
           <ul className="mt-3 divide-y divide-ledger-line border-y border-ledger-line">
             {alerts.slice(0, 5).map((alert) => (
               <li key={alert.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm">
-                <span className="text-ink">{alert.message}</span>
+                <span className="text-ink">{alert.detail ?? "An alert was raised."}</span>
                 <span className="font-mono text-xs text-ink-soft">
                   {formatRelativeTime(alert.created_at)}
                 </span>
