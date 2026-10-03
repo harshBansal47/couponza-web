@@ -30,7 +30,7 @@ export default async function DealsPage() {
     .slice(0, 6);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
+    <div className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="mb-2 font-serif text-3xl text-ink">Today&apos;s deals</h1>
       <p className="mb-12 text-sm text-ink-soft">
         What shoppers most recently confirmed working, and where prices moved.

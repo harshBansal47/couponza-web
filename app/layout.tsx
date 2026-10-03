@@ -1,27 +1,28 @@
 import type { Metadata } from "next";
 import { displayName, getSessionUser } from "@/lib/session";
-import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PromoStrip from "@/components/PromoStrip";
 import ToastProvider from "@/components/ui/Toast";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const display = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-fraunces",
-  axes: ["opsz", "SOFT", "WONK"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-display",
 });
 
-const plexSans = IBM_Plex_Sans({
+const body = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+});
+
+const code = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  variable: "--font-plex-sans",
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-plex-mono",
+  variable: "--font-code",
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -66,15 +67,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const user = await getSessionUser().catch(() => null);
 
   return (
-    <html lang="en" className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable} ${code.variable}`}>
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <ToastProvider>
           <a
             href="#main"
-            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
           >
             Skip to content
           </a>
+          <PromoStrip />
           <Header links={NAV_LINKS} user={user ? { name: displayName(user) } : null} />
           <main id="main" className="flex-1">
             {children}

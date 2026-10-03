@@ -32,7 +32,7 @@ export default async function CouponsPage({
   const storeById = new Map(storesPage.items.map((s) => [s.id, s]));
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
+    <div className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="mb-8 font-serif text-3xl text-ink">
         {query ? `Results for "${query}"` : "All coupons"}
       </h1>

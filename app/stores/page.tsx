@@ -27,7 +27,7 @@ export default async function StoresIndexPage({
   const letters = [...groups.keys()].sort();
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
+    <div className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="mb-8 font-serif text-3xl text-ink">Stores</h1>
       <form action="/stores" className="mb-10 max-w-md">
         <label htmlFor="store-filter" className="sr-only">Filter stores</label>

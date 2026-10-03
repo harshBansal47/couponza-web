@@ -6,9 +6,14 @@ export default function SectionTitle({
   hint?: string;
 }) {
   return (
-    <div className="mb-5 flex items-baseline justify-between border-b border-ledger-line pb-2">
-      <h2 className="font-serif text-xl text-ink">{children}</h2>
-      {hint ? <span className="text-xs text-ink-soft">{hint}</span> : null}
+    <div className="mb-6 flex items-end justify-between gap-3">
+      <div className="flex items-center gap-3">
+        <span aria-hidden="true" className="h-7 w-1.5 rounded-full bg-gradient-to-b from-inkblue to-pink" />
+        <h2 className="font-serif text-2xl font-extrabold text-ink sm:text-3xl">{children}</h2>
+      </div>
+      {hint ? (
+        <span className="shrink-0 rounded-full bg-inkblue/10 px-3 py-1 text-xs font-semibold text-inkblue">{hint}</span>
+      ) : null}
     </div>
   );
 }

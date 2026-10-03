@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12" aria-busy="true" aria-live="polite">
+    <div className="mx-auto max-w-6xl px-6 py-12" aria-busy="true" aria-live="polite">
       <div className="h-8 w-56 animate-pulse bg-ledger-line" />
       <div className="mt-8 space-y-4">
         {Array.from({ length: 5 }).map((_, i) => (

@@ -50,18 +50,18 @@ export default function Header({
     <>
       <header
         ref={headerRef}
-        className={`sticky top-0 z-40 border-b border-ledger-line bg-paper/90 backdrop-blur transition-shadow duration-200 ${
+        className={`sticky top-0 z-40 border-b border-ledger-line/70 bg-white/85 backdrop-blur-md transition-shadow duration-200 ${
           scrolled ? "shadow-[var(--shadow-raised)]" : ""
         }`}
       >
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 sm:px-6 sm:py-4">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6 sm:py-4">
           <Link
             href="/"
-            className="flex shrink-0 items-center font-serif text-lg font-medium tracking-tight text-ink sm:text-xl"
+            className="flex shrink-0 items-center font-serif text-xl font-extrabold tracking-tight text-ink sm:text-2xl"
           >
             <span
               aria-hidden="true"
-              className="mr-1.5 inline-block -rotate-3 border border-verified px-1.5 py-0.5 font-mono text-xs text-verified"
+              className="bg-brand mr-2 inline-flex h-8 w-8 -rotate-6 items-center justify-center rounded-xl font-serif text-base font-extrabold text-white shadow-[var(--shadow-glow)]"
             >
               C
             </span>
@@ -74,7 +74,7 @@ export default function Header({
                 key={link.href}
                 href={link.href}
                 aria-current={pathname === link.href ? "page" : undefined}
-                className="rounded-sm px-3 py-1.5 text-sm text-ink-soft transition-colors hover:bg-ledger-line/40 hover:text-ink"
+                className="rounded-full px-3.5 py-1.5 text-sm font-semibold text-ink-soft transition-colors hover:bg-inkblue/10 hover:text-inkblue aria-[current=page]:bg-inkblue/10 aria-[current=page]:text-inkblue"
               >
                 {link.label}
               </Link>
@@ -88,13 +88,13 @@ export default function Header({
           <div className="hidden shrink-0 items-center gap-2 md:flex">
             <Link
               href={user ? "/account" : "/account/login"}
-              className="flex items-center gap-2 rounded-sm border border-ledger-line bg-paper-raised px-3 py-1.5 text-sm text-ink transition-colors hover:border-inkblue hover:text-inkblue"
+              className="flex items-center gap-2 rounded-full border border-inkblue/30 bg-white px-4 py-1.5 text-sm font-semibold text-inkblue transition-all hover:bg-inkblue hover:text-white hover:shadow-[var(--shadow-glow)]"
             >
               {user ? (
                 <>
                   <span
                     aria-hidden="true"
-                    className="flex h-5 w-5 items-center justify-center rounded-full bg-ink font-mono text-[10px] text-paper"
+                    className="bg-brand flex h-6 w-6 items-center justify-center rounded-full font-mono text-[11px] text-white"
                   >
                     {user.name.charAt(0).toUpperCase()}
                   </span>

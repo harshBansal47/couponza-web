@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { CouponCardGrid } from "@/components/CouponCard";
 import SectionTitle from "@/components/SectionTitle";
+import Hero from "@/components/home/Hero";
+import BannerCarousel from "@/components/home/BannerCarousel";
+import CategoryRow from "@/components/home/CategoryRow";
+import StoreMarquee from "@/components/home/StoreMarquee";
+import HowItWorks from "@/components/home/HowItWorks";
 import { api } from "@/lib/api";
 import { absoluteUrl } from "@/lib/seo";
 import type { Paginated } from "@/lib/types";
@@ -93,52 +97,24 @@ export default async function HomePage() {
     coupons.total === 0 && stores.total === 0 && categories.total === 0;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
 
-      <section className="mx-auto max-w-2xl text-center">
-        <h1 className="text-balance font-serif text-4xl leading-tight text-ink sm:text-5xl">
-          Find a deal worth trusting.
-        </h1>
-        <p className="mt-4 text-ink-soft">
-          Search stores, brands and products. Every code carries a real success rate from real
-          shoppers, and every commission we earn is printed on the page.
-        </p>
-
-        <form action="/search" role="search" className="mt-8">
-          <label htmlFor="hero-search" className="sr-only">
-            Search Couponza
-          </label>
-          <input
-            id="hero-search"
-            name="q"
-            type="search"
-            placeholder="Search Nike, laptops, electronics…"
-            className="input px-5 py-4 text-center font-mono text-sm sm:text-left"
-          />
-        </form>
-
-        {stores.items.length > 0 && (
-          <p className="mt-4 text-sm text-ink-soft">
-            Popular:{" "}
-            {stores.items.slice(0, 5).map((store, i) => (
-              <span key={store.id}>
-                {i > 0 ? " · " : ""}
-                <Link href={`/stores/${store.slug}`} className="text-inkblue hover:underline">
-                  {store.name}
-                </Link>
-              </span>
-            ))}
-          </p>
-        )}
-      </section>
+      <Hero
+        stats={[
+          { label: "Active coupons", value: coupons.total },
+          { label: "Stores", value: stores.total },
+          { label: "Categories", value: categories.total },
+        ]}
+        popularStores={stores.items.map((st) => ({ id: st.id, name: st.name, slug: st.slug }))}
+      />
 
       {isEmpty ? (
-        <section className="mt-16 border border-dashed border-ledger-line px-6 py-12 text-center">
-          <h2 className="font-serif text-xl text-ink">No deals listed yet</h2>
+        <section className="mt-12 rounded-[24px] border-2 border-dashed border-ledger-line bg-white px-6 py-14 text-center">
+          <h2 className="font-serif text-2xl font-extrabold text-ink">No deals listed yet</h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-ink-soft">
             The catalogue is empty. That is the honest state — we would rather show nothing than
             pad the page with codes nobody has confirmed.
@@ -146,8 +122,32 @@ export default async function HomePage() {
         </section>
       ) : (
         <>
+          {categories.items.length > 0 && (
+            <section className="mt-10" id="categories">
+              <CategoryRow categories={categories.items} />
+            </section>
+          )}
+
+          <section className="mt-8">
+            <BannerCarousel />
+          </section>
+
+          {stores.items.length > 0 && (
+            <section className="mt-12" aria-labelledby="stores-heading">
+              <SectionTitle hint={`${stores.total} tracked`}>
+                <span id="stores-heading">Stores we track</span>
+              </SectionTitle>
+              <StoreMarquee stores={stores.items} />
+              <p className="mt-4 text-right text-sm">
+                <Link href="/stores" className="font-semibold text-inkblue hover:underline">
+                  All stores →
+                </Link>
+              </p>
+            </section>
+          )}
+
           {confirmed.length > 0 && (
-            <section className="mt-16">
+            <section className="mt-12">
               <SectionTitle hint={`${confirmed.length} confirmed`}>Confirmed by shoppers</SectionTitle>
               <CouponCardGrid
                 coupons={confirmed}
@@ -159,104 +159,49 @@ export default async function HomePage() {
           )}
 
           {evergreen.length > 0 && (
-            <section className="mt-14">
+            <section className="mt-12">
               <SectionTitle hint="no expiry date">Codes with no expiry</SectionTitle>
               <CouponCardGrid
                 coupons={evergreen}
                 stores={cardStores}
                 variant="featured"
-                className="grid-cols-1 sm:grid-cols-2"
+                className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
               />
             </section>
           )}
 
-          {stores.items.length > 0 && (
-            <section className="mt-14">
-              <SectionTitle hint={`${stores.total} tracked`}>Stores we track</SectionTitle>
-              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {stores.items.map((store) => (
-                  <li key={store.id}>
-                    <Link
-                      href={`/stores/${store.slug}`}
-                      className="flex h-full items-center gap-3 border border-ledger-line bg-paper-raised p-3 transition-colors hover:border-inkblue"
-                    >
-                      {store.logo_url ? (
-                        <Image
-                          src={store.logo_url}
-                          alt=""
-                          width={40}
-                          height={40}
-                          className="h-10 w-10 shrink-0 rounded-full border border-ledger-line bg-paper object-contain"
-                        />
-                      ) : (
-                        <span
-                          aria-hidden="true"
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ledger-line bg-paper font-serif text-ink-soft"
-                        >
-                          {store.name.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm text-ink">{store.name}</span>
-                        {store.country_code && (
-                          <span className="block font-mono text-[10px] text-ink-soft">
-                            {store.country_code}
-                          </span>
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 text-right text-sm">
-                <Link href="/stores" className="text-inkblue hover:underline">
-                  All stores →
-                </Link>
-              </p>
-            </section>
-          )}
-
-          {categories.items.length > 0 && (
-            <section className="mt-14" id="categories">
-              <SectionTitle>Browse by category</SectionTitle>
-              <ul className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                {categories.items.slice(0, 15).map((category) => (
-                  <li key={category.id}>
-                    <Link
-                      href={`/categories/${category.slug}`}
-                      className="block border border-ledger-line bg-paper-raised p-3 text-center text-sm text-ink transition-colors hover:border-inkblue hover:text-inkblue"
-                    >
-                      {category.icon && (
-                        <span className="mb-1 block text-xl" aria-hidden="true">
-                          {category.icon}
-                        </span>
-                      )}
-                      <span className="line-clamp-2">{category.name}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 text-right text-sm">
-                <Link href="/categories" className="text-inkblue hover:underline">
-                  All categories →
-                </Link>
-              </p>
-            </section>
-          )}
+          <section className="mt-16">
+            <SectionTitle>How it works</SectionTitle>
+            <HowItWorks />
+          </section>
 
           <section className="mt-16">
-            <h2 className="text-center font-serif text-xl text-ink">
+            <h2 className="text-center font-serif text-2xl font-extrabold text-ink sm:text-3xl">
               Why this is not a red-badge countdown site
             </h2>
-            <ul className="mt-8 grid gap-6 md:grid-cols-3">
-              {PILLARS.map((pillar) => (
-                <li key={pillar.title} className="border border-ledger-line bg-paper-raised p-6">
-                  <h3 className="font-serif text-lg text-ink">{pillar.title}</h3>
+            <ul className="mt-8 grid gap-5 md:grid-cols-3">
+              {PILLARS.map((pillar, i) => (
+                <li
+                  key={pillar.title}
+                  className="lift rounded-[22px] border border-ledger-line bg-white p-6 shadow-[var(--shadow-hairline)]"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`flex h-11 w-11 items-center justify-center rounded-2xl text-xl text-white ${
+                      i === 0 ? "bg-brand" : i === 1 ? "bg-brand-warm" : "bg-brand-night"
+                    }`}
+                  >
+                    {i === 0 ? "✓" : i === 1 ? "%" : "↗"}
+                  </span>
+                  <h3 className="mt-4 font-serif text-xl font-bold text-ink">{pillar.title}</h3>
                   <p className="mt-2 text-sm text-ink-soft">{pillar.body}</p>
-                  <ul className="mt-4 space-y-1.5 text-xs text-ink-soft">
+                  <ul className="mt-4 space-y-2 text-sm text-ink-soft">
                     {pillar.points.map((point) => (
                       <li key={point} className="flex items-start gap-2">
-                        <span className="text-verified" aria-hidden="true">
+                        <span
+                          className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-verified-soft text-[10px] font-bold text-verified"
+                          aria-hidden="true"
+                        >
                           ✓
                         </span>
                         {point}
@@ -266,22 +211,6 @@ export default async function HomePage() {
                 </li>
               ))}
             </ul>
-          </section>
-
-          <section className="mt-16 border border-ledger-line bg-paper-raised p-8 text-center">
-            <h2 className="font-serif text-2xl text-ink">Track a price and stop checking back</h2>
-            <p className="mx-auto mt-2 max-w-lg text-ink-soft">
-              Save the stores you use, follow a product, and we email you when its price drops or a
-              confirmed code appears for it.
-            </p>
-            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link href="/account/register" className="btn-primary">
-                Create a free account
-              </Link>
-              <Link href="/search" className="btn-outline">
-                Search deals
-              </Link>
-            </div>
           </section>
         </>
       )}

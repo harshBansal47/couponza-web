@@ -1,38 +1,56 @@
 @import "tailwindcss";
 
 /*
-  Design concept: "proof, not promises." A ledger/receipt visual language —
-  paper, ink, hairline rules, a rubber-stamp verified green — instead of the
-  red-badge/countdown-clock urgency look every other coupon site uses. That
-  urgency look is exactly what a community-verified, commission-transparent
-  site should NOT look like; the calm, documentary tone is the differentiator.
+  Design concept: "bright marketplace, honest numbers." A light, energetic
+  cashback-style storefront: indigo-to-violet gradients, orange action pills,
+  ticket-shaped coupon cards, banners and motion. The brand promise stays the
+  same (community-verified, commission disclosed): the energy is in the
+  design, never in fake countdowns or invented scarcity.
+
+  Token NAMES (paper, ink, verified, rust, inkblue, ledger-line) are kept from
+  the previous theme so every existing page re-skins without markup changes.
 */
 @theme {
-  --color-paper: #f7f6f1;
-  --color-paper-raised: #fcfbf8;
-  --color-ink: #22261f;
-  --color-ink-soft: #565c4e;
-  --color-verified: #1f6f4a;
-  --color-verified-soft: #e7efe9;
-  --color-rust: #b5502e;
-  --color-rust-soft: #f4e7e1;
-  --color-ledger-line: #d8d4c6;
-  --color-inkblue: #2c4a52;
+  --color-paper: #f4f5fb;
+  --color-paper-raised: #ffffff;
+  --color-ink: #131a36;
+  --color-ink-soft: #5a6285;
+  --color-verified: #0f9d58;
+  --color-verified-soft: #e3f6ec;
+  --color-rust: #ff6a1a;
+  --color-rust-soft: #fff1e7;
+  --color-ledger-line: #e3e6f3;
+  --color-inkblue: #4f46e5;
 
-  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
+  --color-violet: #7c3aed;
+  --color-sun: #ffc933;
+  --color-sun-soft: #fff6d6;
+  --color-pink: #ff4d8d;
+  --color-night: #0e1330;
 
-  /* Radius scale (deliberately small — ledger/paper, not bubbles). */
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 8px;
+  --font-serif: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-code), ui-monospace, "SF Mono", monospace;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
   --radius-full: 9999px;
 
-  /* Shadow scale: hairline and subtle, never dramatic. */
-  --shadow-hairline: 0 1px 0 rgba(34, 38, 31, 0.06);
-  --shadow-raised: 0 2px 8px rgba(34, 38, 31, 0.08);
-  --shadow-overlay: 0 8px 24px rgba(34, 38, 31, 0.12);
+  --shadow-hairline: 0 1px 0 rgba(19, 26, 54, 0.05);
+  --shadow-raised: 0 4px 14px rgba(40, 40, 120, 0.08);
+  --shadow-overlay: 0 18px 40px rgba(40, 40, 120, 0.18);
+  --shadow-glow: 0 10px 26px rgba(79, 70, 229, 0.35);
+  --shadow-glow-orange: 0 10px 24px rgba(255, 106, 26, 0.38);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-slow: float 9s ease-in-out infinite;
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-pop: pop 380ms var(--ease-out) both;
+  --animate-gradient: gradientShift 14s ease infinite;
 }
 
 :root {
@@ -41,50 +59,184 @@
 
 body {
   background-color: var(--color-paper);
+  background-image:
+    radial-gradient(900px 420px at 10% -5%, rgba(124, 58, 237, 0.07), transparent 60%),
+    radial-gradient(800px 380px at 95% 0%, rgba(255, 106, 26, 0.06), transparent 60%);
+  background-repeat: no-repeat;
   color: var(--color-ink);
 }
 
-/* Button variants — one place, so every CTA on the site reads the same. */
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+}
+
+/* Buttons: pill shaped, one place so every CTA reads the same. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   border: 1px solid transparent;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.15rem;
   font-size: 0.875rem;
-  font-weight: 500;
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+  font-weight: 600;
+  transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out),
+    background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-primary { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
-.btn-primary:hover:not(:disabled) { background: transparent; color: var(--color-ink); }
-.btn-outline { background: transparent; color: var(--color-ink); border-color: var(--color-ink); }
-.btn-outline:hover:not(:disabled) { background: var(--color-ink); color: var(--color-paper); }
+.btn:active:not(:disabled) { transform: scale(0.97); }
+
+.btn-primary {
+  background-image: linear-gradient(135deg, var(--color-inkblue), var(--color-violet));
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(79, 70, 229, 0.45); }
+
+.btn-outline { background: #fff; color: var(--color-inkblue); border-color: color-mix(in srgb, var(--color-inkblue) 40%, transparent); }
+.btn-outline:hover:not(:disabled) { background: var(--color-inkblue); color: #fff; }
+
 .btn-ghost { background: transparent; color: var(--color-ink-soft); }
-.btn-ghost:hover:not(:disabled) { color: var(--color-ink); }
-.btn-verified { background: var(--color-verified); color: var(--color-paper); border-color: var(--color-verified); }
-.btn-verified:hover:not(:disabled) { opacity: 0.9; }
+.btn-ghost:hover:not(:disabled) { color: var(--color-ink); background: rgba(79, 70, 229, 0.08); }
+
+.btn-verified { background: var(--color-verified); color: #fff; border-color: var(--color-verified); box-shadow: 0 8px 20px rgba(15, 157, 88, 0.3); }
+.btn-verified:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.95; }
+
+/* The big orange "get it" action, with a light sweep on hover. */
+.btn-cta {
+  background-image: linear-gradient(135deg, #ff8a3d, var(--color-rust));
+  color: #fff;
+  box-shadow: var(--shadow-glow-orange);
+}
+.btn-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+}
+.btn-cta:hover:not(:disabled) { transform: translateY(-1px); }
+.btn-cta:hover:not(:disabled)::after { transform: translateX(120%); transition: transform 700ms var(--ease-out); }
 
 /* Inputs share one look across the site. */
 .input {
   width: 100%;
-  border: 1px solid var(--color-ledger-line);
-  border-radius: var(--radius-sm);
-  background: var(--color-paper-raised);
-  padding: 0.625rem 0.75rem;
+  border: 1.5px solid var(--color-ledger-line);
+  border-radius: var(--radius-md);
+  background: #fff;
+  padding: 0.65rem 0.9rem;
   font-size: 0.875rem;
   color: var(--color-ink);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 .input:focus {
   outline: none;
   border-color: var(--color-inkblue);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
 }
 .input::placeholder { color: var(--color-ink-soft); }
 .input[aria-invalid="true"] { border-color: var(--color-rust); }
 
+/* Brand surfaces */
+.bg-brand {
+  background-image: linear-gradient(135deg, #4338ca 0%, #6d3be8 55%, #9b4dff 100%);
+}
+.bg-brand-warm {
+  background-image: linear-gradient(135deg, #ff7a1a 0%, #ff4d8d 100%);
+}
+.bg-brand-night {
+  background-image: linear-gradient(160deg, #0e1330 0%, #1b1f55 100%);
+}
+.bg-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.22) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+.text-gradient {
+  background-image: linear-gradient(90deg, var(--color-inkblue), var(--color-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Lift-on-hover card */
+.lift {
+  transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-color 200ms ease;
+}
+.lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-overlay);
+  border-color: color-mix(in srgb, var(--color-inkblue) 40%, transparent);
+}
+
+/* Ticket card: notches cut into the left/right edge at the divider line. */
+.ticket {
+  position: relative;
+  --notch-y: 5.6rem;
+  -webkit-mask:
+    radial-gradient(circle 9px at 0 var(--notch-y), #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 9px at 100% var(--notch-y), #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 9px at 0 var(--notch-y), #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 9px at 100% var(--notch-y), #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: var(--animate-marquee);
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+.shimmer {
+  background: linear-gradient(100deg, #eceefa 30%, #f8f9ff 50%, #eceefa 70%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Confetti burst used by the code-copy action. Colors/offsets come from CSS vars. */
+.confetti-piece {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--c, #ff6a1a);
+  pointer-events: none;
+  animation: confetti 900ms var(--ease-out) forwards;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-14px) rotate(calc(var(--r, 0deg) + 4deg)); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes pop {
+  0% { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes confetti {
+  0% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x, 0px)), calc(-50% + var(--y, -80px))) rotate(var(--rot, 300deg)) scale(0.6);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -216,3 +368,21 @@ body {
     display: none !important;
   }
 }
+
+/* Reduced motion: stop the marquee and let it scroll by hand instead. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none !important; }
+  .marquee { overflow-x: auto; }
+}
+
+/* Wrapper carries the shadow + hover lift because the ticket's notch mask
+   would clip a shadow drawn on the card itself. */
+.ticket-wrap {
+  filter: drop-shadow(0 4px 10px rgba(40, 40, 120, 0.1));
+  transition: transform 220ms var(--ease-out), filter 220ms var(--ease-out);
+}
+.ticket-wrap:hover {
+  transform: translateY(-5px);
+  filter: drop-shadow(0 16px 24px rgba(40, 40, 120, 0.2));
+}
+.ticket { --notch-y: 6rem; }
