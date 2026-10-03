@@ -298,53 +298,62 @@ export function HeaderSearch({ popular = [] }: { popular?: string[] }) {
         Search stores, brands, categories
       </label>
       <div className="relative">
-        <span aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-          <Icon name="tag" />
-        </span>
-        <input
-          ref={inputRef}
-          id="header-search"
-          type="search"
-          role="combobox"
-          aria-expanded={showPanel}
-          aria-controls="header-search-suggestions"
-          aria-autocomplete="list"
-          aria-activedescendant={activeIndex >= 0 ? `hs-${activeIndex}` : undefined}
-          value={value}
-          placeholder="Search stores, brands, categories…"
-          onChange={(e) => {
-            setValue(e.target.value);
-            setActiveIndex(-1);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={handleKeyDown}
-          autoComplete="off"
-          className="input w-full py-2 pl-10 pr-9"
-        />
-        {loading ? (
-          <span
-            aria-hidden="true"
-            className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-ledger-line border-t-inkblue"
-          />
-        ) : value ? (
-          <button
-            type="button"
-            onClick={() => {
-              setValue("");
-              setActiveIndex(-1);
-              inputRef.current?.focus();
-            }}
-            className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-sm text-ink-soft transition-colors hover:text-ink"
-            aria-label="Clear search"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        ) : null}
-      </div>
+  <span
+    aria-hidden="true"
+    className="pointer-events-none absolute left-3.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-ink-soft"
+  >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <path d="M21 21l-4.35-4.35" />
+    </svg>
+  </span>
+
+  <input
+    ref={inputRef}
+    id="header-search"
+    type="search"
+    role="combobox"
+    aria-expanded={showPanel}
+    aria-controls="header-search-suggestions"
+    aria-autocomplete="list"
+    aria-activedescendant={activeIndex >= 0 ? `hs-${activeIndex}` : undefined}
+    value={value}
+    placeholder="Search stores, brands, categories…"
+    onChange={(e) => {
+      setValue(e.target.value);
+      setActiveIndex(-1);
+      setOpen(true);
+    }}
+    onFocus={() => setOpen(true)}
+    onKeyDown={handleKeyDown}
+    autoComplete="off"
+    style={{ paddingLeft: "2.75rem", paddingRight: "2.5rem" }}
+    className="input h-10 w-full truncate text-sm [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+  />
+
+  {loading ? (
+    <span
+      aria-hidden="true"
+      className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-ledger-line border-t-inkblue"
+    />
+  ) : value ? (
+    <button
+      type="button"
+      onClick={() => {
+        setValue("");
+        setActiveIndex(-1);
+        inputRef.current?.focus();
+      }}
+      className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-sm text-ink-soft transition-colors hover:bg-ledger-line/40 hover:text-ink"
+      aria-label="Clear search"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  ) : null}
+</div>
 
       {showPanel && (
         <ul

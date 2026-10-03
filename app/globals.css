@@ -158,11 +158,11 @@ body {
   .animate-fade-in {
     animation: fadeIn 200ms ease-out both;
   }
-  .animate-slide-up {
-    animation: slideUp 240ms ease-out both;
+  .animate-slide-in {
+    animation: slideIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
-  .animate-slide-down {
-    animation: slideDown 200ms ease-out both;
+  .animate-slide-up-stagger {
+    animation: slideUpStagger 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 
@@ -178,6 +178,16 @@ body {
 
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideUpStagger {
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 

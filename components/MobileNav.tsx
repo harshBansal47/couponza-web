@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { NavLink } from "./Header";
@@ -8,9 +9,8 @@ import type { NavLink } from "./Header";
 const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
- * Small-screen navigation drawer. Rendered as a fixed overlay with its own
- * focus trap and scroll lock, so it behaves like a dialog rather than a
- * page that grew extra links.
+ * Small-screen navigation drawer. Rendered in a portal as a full-screen
+ * overlay with its own focus trap and scroll lock, so it behaves like a dialog.
  */
 export default function MobileNav({
   links,
@@ -74,7 +74,7 @@ export default function MobileNav({
         aria-label="Menu"
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="btn-ghost flex h-11 w-11 items-center justify-center"
+        className="btn-ghost flex h-11 w-11 items-center justify-center touch-target"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <line x1="3" y1="12" x2="21" y2="12" />
@@ -83,82 +83,101 @@ export default function MobileNav({
         </svg>
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 animate-fade-in bg-ink/40"
-            onClick={close}
-            role="presentation"
-          />
-          <div
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site menu"
-            className="absolute inset-y-0 left-0 flex w-[85%] max-w-xs animate-fade-in flex-col border-r border-ledger-line bg-paper shadow-[var(--shadow-overlay)]"
-          >
-            <div className="flex items-center justify-between border-b border-ledger-line px-4 py-3">
-              <span className="font-serif text-base text-ink">Menu</span>
-              <button
-                type="button"
-                onClick={close}
-                aria-label="Close menu"
-                className="btn-ghost -mr-2 flex h-11 w-11 items-center justify-center"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
+      {open &&
+        createPortal(
+          <div className="fixed inset-0 z-50 md:hidden animate-fade-in">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 animate-fade-in bg-black/60 backdrop-blur-sm"
+              onClick={close}
+              role="presentation"
+              aria-hidden="true"
+            />
 
-            <nav aria-label="Mobile" className="flex-1 overflow-y-auto overscroll-contain-y p-2">
-              <ul>
-                {links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      onClick={close}
-                      aria-current={pathname === link.href ? "page" : undefined}
-                      className={`block rounded-sm px-3 py-3 text-base transition-colors ${
-                        pathname === link.href ? "bg-ledger-line/50 text-ink" : "text-ink hover:bg-ledger-line/30"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
-            <div className="border-t border-ledger-line p-3 pb-safe">
-              {onOpenSearch && (
+            {/* Full-screen panel on mobile. The whole panel scrolls on short screens. */}
+            <div
+              ref={panelRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
+              className="absolute inset-y-0 right-0 flex w-full animate-slide-in flex-col overflow-y-auto overscroll-contain bg-paper shadow-[var(--shadow-overlay)] md:max-w-sm md:border-l md:border-ledger-line"
+            >
+              {/* Top bar: brand + close, mirrors the site header */}
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-ledger-line bg-paper-raised px-4">
+                <span className="flex items-center font-serif text-lg font-medium tracking-tight text-ink">
+                  <span
+                    aria-hidden="true"
+                    className="mr-1.5 inline-block -rotate-3 border border-verified px-1.5 py-0.5 font-mono text-xs text-verified"
+                  >
+                    C
+                  </span>
+                  Couponza
+                </span>
                 <button
                   type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    onOpenSearch();
-                  }}
-                  className="btn-outline mb-2 flex w-full items-center justify-center gap-2"
+                  onClick={close}
+                  aria-label="Close menu"
+                  className="btn-ghost -mr-2 flex h-11 w-11 items-center justify-center touch-target"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
-                  Search
                 </button>
-              )}
-              <Link
-                href={accountLink.href}
-                onClick={close}
-                className="btn-primary flex w-full items-center justify-center"
-              >
-                {accountLink.label}
-              </Link>
+              </div>
+
+              {/* Links */}
+              <nav aria-label="Mobile" className="shrink-0 bg-paper px-3 py-3">
+                <ul className="space-y-1">
+                  {links.map((link, index) => (
+                    <li key={link.href} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-up-stagger">
+                      <Link
+                        href={link.href}
+                        onClick={close}
+                        aria-current={pathname === link.href ? "page" : undefined}
+                        className={`flex min-h-12 items-center rounded-sm px-4 py-3 text-base transition-colors duration-150 ${
+                          pathname === link.href
+                            ? "bg-ledger-line/50 font-medium text-ink"
+                            : "text-ink-soft hover:bg-ledger-line/30 hover:text-ink"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              {/* Actions: pinned to bottom on tall screens, scrolls on short ones */}
+              <div className="mt-auto shrink-0 space-y-3 border-t border-ledger-line bg-paper-raised px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                {onOpenSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenSearch();
+                    }}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-sm border border-ledger-line bg-paper px-4 text-base font-medium text-ink transition-colors hover:border-inkblue hover:text-inkblue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inkblue"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                    Search
+                  </button>
+                )}
+                <Link
+                  href={accountLink.href}
+                  onClick={close}
+                  className="flex h-12 w-full items-center justify-center rounded-sm border border-ink bg-ink px-4 text-base font-medium text-paper transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inkblue focus-visible:ring-offset-2"
+                >
+                  {accountLink.label}
+                </Link>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 }

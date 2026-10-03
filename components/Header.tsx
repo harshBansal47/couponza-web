@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import MobileNav from "./MobileNav";
@@ -22,6 +22,22 @@ export default function Header({
   const [scrolled, setScrolled] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Expose header height as CSS variable for mobile menu positioning
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (header) {
+      const height = header.getBoundingClientRect().height;
+      document.documentElement.style.setProperty("--header-height", `${height}px`);
+    }
+    const onResize = () => {
+      const h = headerRef.current?.getBoundingClientRect().height ?? 0;
+      document.documentElement.style.setProperty("--header-height", `${h}px`);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -33,6 +49,7 @@ export default function Header({
   return (
     <>
       <header
+        ref={headerRef}
         className={`sticky top-0 z-40 border-b border-ledger-line bg-paper/90 backdrop-blur transition-shadow duration-200 ${
           scrolled ? "shadow-[var(--shadow-raised)]" : ""
         }`}
