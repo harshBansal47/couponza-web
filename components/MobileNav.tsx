@@ -169,7 +169,7 @@ export default function MobileNav({
                 <Link
                   href={accountLink.href}
                   onClick={close}
-                  className="flex h-12 w-full items-center justify-center rounded-sm border border-ink bg-ink px-4 text-base font-medium text-paper transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inkblue focus-visible:ring-offset-2"
+                  className="btn btn-primary flex h-12 w-full text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inkblue focus-visible:ring-offset-2"
                 >
                   {accountLink.label}
                 </Link>

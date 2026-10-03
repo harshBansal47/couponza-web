@@ -31,7 +31,7 @@ export default function SearchBar() {
       />
       <button
         type="submit"
-        className="rounded-sm border border-ink px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink hover:text-paper"
+        className="btn btn-outline"
       >
         Search
       </button>

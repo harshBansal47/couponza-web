@@ -7,6 +7,7 @@ import BannerCarousel from "@/components/home/BannerCarousel";
 import CategoryRow from "@/components/home/CategoryRow";
 import StoreMarquee from "@/components/home/StoreMarquee";
 import HowItWorks from "@/components/home/HowItWorks";
+import DealsCarousel from "@/components/home/DealsCarousel";
 import { api } from "@/lib/api";
 import { absoluteUrl } from "@/lib/seo";
 import type { Paginated } from "@/lib/types";
@@ -149,12 +150,7 @@ export default async function HomePage() {
           {confirmed.length > 0 && (
             <section className="mt-12">
               <SectionTitle hint={`${confirmed.length} confirmed`}>Confirmed by shoppers</SectionTitle>
-              <CouponCardGrid
-                coupons={confirmed}
-                stores={cardStores}
-                variant="coupon"
-                className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-              />
+              <DealsCarousel coupons={confirmed} stores={cardStores} label="Deals confirmed by shoppers" />
             </section>
           )}
 

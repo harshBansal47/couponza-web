@@ -94,43 +94,57 @@ export default function StorePageClient({
 
   return (
     <div className="space-y-10 sm:space-y-14">
-      <header className="flex flex-col gap-5 border-b border-ledger-line pb-8 sm:flex-row sm:items-start">
-        <StoreMark store={store} size={72} />
-
-        <div className="min-w-0 flex-1">
-          <h1 className="font-serif text-3xl leading-tight text-ink sm:text-4xl">{store.name}</h1>
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-soft">
-            {store.country_code && <span>{store.country_code}</span>}
-            <span>{stats.total} listed deals</span>
-            {store.website_url && (
-              <a
-                href={store.website_url}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="text-inkblue underline-offset-2 hover:underline"
-              >
-                {new URL(store.website_url).hostname.replace(/^www\./, "")}
-                <span className="sr-only"> (opens in a new tab)</span>
-              </a>
-            )}
+      <header className="bg-brand relative overflow-hidden rounded-[26px] text-white shadow-[var(--shadow-overlay)]">
+        {/* Dynamic per-store poster from /banners/[slug]; the gradient above shows if it fails to load. */}
+        <Image
+          src={`/banners/${store.slug}`}
+          alt=""
+          fill
+          unoptimized
+          priority
+          sizes="(min-width: 1152px) 1152px, 100vw"
+          className="object-cover"
+        />
+        <div className="relative flex flex-col gap-5 px-5 py-8 sm:flex-row sm:items-center sm:px-9 sm:py-10">
+          <div className="shrink-0 self-start rounded-full bg-white p-1.5 shadow-[var(--shadow-overlay)]">
+            <StoreMark store={store} size={76} />
           </div>
-          {store.description && <p className="mt-3 max-w-prose text-ink-soft">{store.description}</p>}
-        </div>
 
-        <button
-          type="button"
-          onClick={share}
-          className="btn-outline shrink-0 self-start"
-          aria-live="polite"
-        >
-          {copied ? "Link copied" : "Share"}
-        </button>
+          <div className="min-w-0 flex-1">
+            <h1 className="font-serif text-3xl font-extrabold leading-tight sm:text-5xl">{store.name}</h1>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
+              {store.country_code && <span className="rounded-full bg-white/20 px-3 py-1 backdrop-blur">{store.country_code}</span>}
+              <span className="rounded-full bg-white/20 px-3 py-1 backdrop-blur">{stats.total} listed deals</span>
+              {store.website_url && (
+                <a
+                  href={store.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="rounded-full bg-white/20 px-3 py-1 backdrop-blur transition-colors hover:bg-white hover:text-inkblue"
+                >
+                  {new URL(store.website_url).hostname.replace(/^www\./, "")}
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              )}
+            </div>
+            {store.description && <p className="mt-3 max-w-prose text-sm text-white/90 sm:text-base">{store.description}</p>}
+          </div>
+
+          <button
+            type="button"
+            onClick={share}
+            className="btn shrink-0 self-start bg-white text-inkblue hover:bg-white/90"
+            aria-live="polite"
+          >
+            {copied ? "Link copied" : "Share"}
+          </button>
+        </div>
       </header>
 
       {/* Disclosure sits above the deals, not buried in a footer — the whole
           point of the site is that you can see where the money comes from. */}
       {store.commission_disclosure && (
-        <section className="border-l-2 border-inkblue bg-inkblue/5 px-4 py-3">
+        <section className="rounded-2xl border border-inkblue/20 bg-inkblue/5 px-5 py-4">
           <h2 className="font-mono text-[10px] uppercase tracking-widest text-inkblue">Commission</h2>
           <p className="mt-1 text-sm text-ink">{store.commission_disclosure}</p>
         </section>
@@ -139,36 +153,36 @@ export default function StorePageClient({
       {visibleTabs.length > 0 ? (
         <ClientTabs tabs={visibleTabs} />
       ) : (
-        <p className="border border-dashed border-ledger-line px-4 py-8 text-center text-ink-soft">
+        <p className="rounded-[22px] border-2 border-dashed border-ledger-line bg-white px-4 py-10 text-center text-ink-soft">
           No active codes for {store.name} right now. We only list codes a person has confirmed, so
           this page stays empty rather than showing dead offers.
         </p>
       )}
 
       <section aria-labelledby="proof">
-        <h2 id="proof" className="font-serif text-xl text-ink">
+        <h2 id="proof" className="font-serif text-2xl font-extrabold text-ink">
           How much of this is actually confirmed
         </h2>
         <dl className="mt-4 grid gap-4 sm:grid-cols-3">
-          <div className="border border-ledger-line bg-paper-raised p-4">
+          <div className="lift rounded-2xl border border-ledger-line bg-white p-4 shadow-[var(--shadow-hairline)]">
             <dt className="font-mono text-[10px] uppercase tracking-widest text-ink-soft">
               Confirmed codes
             </dt>
-            <dd className="mt-1 font-serif text-3xl text-ink">{stats.verified}</dd>
+            <dd className="mt-1 font-serif text-3xl font-extrabold text-ink">{stats.verified}</dd>
             <p className="mt-1 text-xs text-ink-soft">of {stats.total} listed</p>
           </div>
-          <div className="border border-ledger-line bg-paper-raised p-4">
+          <div className="lift rounded-2xl border border-ledger-line bg-white p-4 shadow-[var(--shadow-hairline)]">
             <dt className="font-mono text-[10px] uppercase tracking-widest text-ink-soft">
               Average success
             </dt>
-            <dd className="mt-1 font-serif text-3xl text-ink">
+            <dd className="mt-1 font-serif text-3xl font-extrabold text-ink">
               {stats.total > 0 ? `${Math.round(stats.avgRate * 100)}%` : "—"}
             </dd>
             <p className="mt-1 text-xs text-ink-soft">across every vote on this store</p>
           </div>
-          <div className="border border-ledger-line bg-paper-raised p-4">
+          <div className="lift rounded-2xl border border-ledger-line bg-white p-4 shadow-[var(--shadow-hairline)]">
             <dt className="font-mono text-[10px] uppercase tracking-widest text-ink-soft">Prices in</dt>
-            <dd className="mt-1 font-serif text-3xl text-ink">{code}</dd>
+            <dd className="mt-1 font-serif text-3xl font-extrabold text-ink">{code}</dd>
             <p className="mt-1 text-xs text-ink-soft">{store.country_code ?? "all markets"}</p>
           </div>
         </dl>
@@ -184,7 +198,7 @@ export default function StorePageClient({
 
       {relatedStores.length > 0 && (
         <section aria-labelledby="related">
-          <h2 id="related" className="font-serif text-xl text-ink">
+          <h2 id="related" className="font-serif text-2xl font-extrabold text-ink">
             Other stores we track
           </h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -192,7 +206,7 @@ export default function StorePageClient({
               <li key={related.id}>
                 <Link
                   href={`/stores/${related.slug}`}
-                  className="flex items-center gap-3 border border-ledger-line bg-paper-raised p-3 transition-colors hover:border-inkblue"
+                  className="lift flex items-center gap-3 rounded-2xl border border-ledger-line bg-white p-3"
                 >
                   <StoreMark store={related} size={36} />
                   <span className="min-w-0 flex-1">

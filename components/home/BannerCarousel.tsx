@@ -63,7 +63,7 @@ export default function BannerCarousel() {
   // Autoplay: paused on hover/focus, and never for reduced-motion users.
   useEffect(() => {
     if (paused) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if ((window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false)) return;
     const t = setInterval(() => goTo(active + 1), 6500);
     return () => clearInterval(t);
   }, [active, paused, goTo]);
