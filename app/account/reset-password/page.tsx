@@ -6,7 +6,7 @@ import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Reset password",
-  description: "Set a new password for your Couponza account.",
+  description: "Set a new password for your Couponbase account.",
   alternates: { canonical: absoluteUrl("/account/reset-password") },
   robots: { index: false, follow: false },
 };
@@ -55,7 +55,7 @@ export default async function ResetPasswordPage({
               <path d="M2 17l10 5 10-5" strokeWidth={2} />
               <path d="M2 12l10 5 10-5" strokeWidth={2} />
             </svg>
-            <span className="font-serif text-2xl">Couponza</span>
+            <span className="font-serif text-2xl">Couponbase</span>
           </Link>
           <h1 className="font-serif text-3xl text-ink">Reset password</h1>
           <p className="mt-2 text-ink-soft">

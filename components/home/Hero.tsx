@@ -51,7 +51,7 @@ export default function Hero({ stats, popularStores }: HeroProps) {
 
         <form action="/search" role="search" className="mx-auto mt-8 max-w-xl">
           <label htmlFor="hero-search" className="sr-only">
-            Search Couponza
+            Search Couponbase
           </label>
           <div className="flex items-center gap-2 rounded-full bg-white p-1.5 shadow-[var(--shadow-overlay)]">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="ml-3 shrink-0 text-ink-soft" aria-hidden="true">

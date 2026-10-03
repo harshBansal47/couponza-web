@@ -61,7 +61,7 @@ describe("Hero", () => {
   it("has a labelled search form that submits to /search", () => {
     render(<Hero stats={[]} popularStores={[{ id: "1", name: "Nike", slug: "nike" }]} />);
     expect(screen.getByRole("search")).toHaveAttribute("action", "/search");
-    expect(screen.getByLabelText("Search Couponza")).toHaveAttribute("name", "q");
+    expect(screen.getByLabelText("Search Couponbase")).toHaveAttribute("name", "q");
     expect(screen.getByRole("link", { name: "Nike" })).toHaveAttribute("href", "/stores/nike");
   });
 });

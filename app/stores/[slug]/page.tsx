@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${store.name} coupons, codes and price drops`,
     description,
     alternates: { canonical: `/stores/${store.slug}` },
-    openGraph: { title: `${store.name} deals on Couponza`, description, type: "website" },
+    openGraph: { title: `${store.name} deals on Couponbase`, description, type: "website" },
   };
 }
 

@@ -7,7 +7,7 @@ import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to your Couponza account to see saved deals and tracked prices.",
+  description: "Sign in to your Couponbase account to see saved deals and tracked prices.",
   alternates: { canonical: absoluteUrl("/account/login") },
   // Account pages are per-user; keep them out of the index.
   robots: { index: false, follow: true },

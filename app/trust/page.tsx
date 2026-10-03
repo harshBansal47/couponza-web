@@ -5,7 +5,7 @@ import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "How this works",
-  description: "How Couponza verifies deals and discloses commissions.",
+  description: "How Couponbase verifies deals and discloses commissions.",
   alternates: { canonical: absoluteUrl("/trust") },
   openGraph: { title: "How this works", url: absoluteUrl("/trust") },
 };

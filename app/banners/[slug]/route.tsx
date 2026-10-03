@@ -28,7 +28,7 @@ function hash(s: string) {
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const store = await resilient.getStoreBySlug(slug).catch(() => null);
-  const name = (store?.name ?? "Couponza").slice(0, 14);
+  const name = (store?.name ?? "Couponbase").slice(0, 14);
   const [a, b, accent] = PALETTES[hash(slug) % PALETTES.length];
 
   return new ImageResponse(

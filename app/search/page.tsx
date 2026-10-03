@@ -11,7 +11,7 @@ import type { CouponPublic, Product, Store } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Search",
-  description: "Search every store, code, price drop and category Couponza tracks.",
+  description: "Search every store, code, price drop and category Couponbase tracks.",
 };
 
 export const dynamic = "force-dynamic";
@@ -115,7 +115,7 @@ function SearchBox({ query }: { query: string }) {
   return (
     <form action="/search" role="search" className="mb-8">
       <label htmlFor="site-search" className="sr-only">
-        Search Couponza
+        Search Couponbase
       </label>
       <input
         id="site-search"

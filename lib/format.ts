@@ -13,7 +13,7 @@ export function formatDiscount(coupon: CouponPublic, currency = "USD"): string {
 
 /**
  * Money formatting that respects the store/product's own currency.
- * Couponza is multi-market, so nothing may assume USD or en-IN.
+ * Couponbase is multi-market, so nothing may assume USD or en-IN.
  */
 export function formatMoney(amount: number, currency = "USD", locale?: string): string {
   try {

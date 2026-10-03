@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { loadOgFonts } from "@/lib/og-fonts";
 
-export const alt = "Couponza — deals verified by people, not paid placement";
+export const alt = "Couponbase — deals verified by people, not paid placement";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -29,7 +29,7 @@ export default async function Image() {
         }}
       >
         <div style={{ display: "flex", fontFamily: serif, fontSize: 36, color: INK, marginBottom: 24 }}>
-          Couponza
+          Couponbase
         </div>
         <div
           style={{

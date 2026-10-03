@@ -65,7 +65,7 @@ export default function Header({
             >
               C
             </span>
-            Couponza
+            Couponbase
           </Link>
 
           <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex" aria-label="Main">

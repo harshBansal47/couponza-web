@@ -3,7 +3,7 @@ import { ApiError, resilient } from "@/lib/api";
 import { formatDiscount, successRateLabel } from "@/lib/format";
 import { loadOgFonts } from "@/lib/og-fonts";
 
-export const alt = "A Couponza deal";
+export const alt = "A Couponbase deal";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -17,7 +17,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const { slug } = await params;
   const fonts = await loadOgFonts();
 
-  let title = "A Couponza deal";
+  let title = "A Couponbase deal";
   let storeName = "";
   let discount = "";
   let rate: string | null = null;
@@ -54,7 +54,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div style={{ display: "flex", fontFamily: serif, fontSize: 32, color: INK }}>
-            Couponza
+            Couponbase
           </div>
           {rate && (
             <div

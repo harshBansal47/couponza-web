@@ -13,7 +13,7 @@ import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Notification settings",
-  description: "Choose how Couponza reaches you about price drops and confirmed codes.",
+  description: "Choose how Couponbase reaches you about price drops and confirmed codes.",
   alternates: { canonical: absoluteUrl("/account/notifications") },
   robots: { index: false, follow: false },
 };

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms",
-  description: "The rules of using Couponza.",
+  description: "The rules of using Couponbase.",
 };
 
 export default function TermsPage() {
@@ -11,7 +11,7 @@ export default function TermsPage() {
       <h1 className="font-serif text-3xl text-ink">Terms</h1>
       <div className="mt-6 space-y-4 text-ink-soft">
         <p>
-          Couponza lists offers from third-party merchants. We verify them community-wide but cannot
+          Couponbase lists offers from third-party merchants. We verify them community-wide but cannot
           guarantee every code will work at every checkout — that is what the success-rate evidence on
           each page is for.
         </p>

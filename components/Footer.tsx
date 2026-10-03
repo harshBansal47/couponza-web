@@ -66,7 +66,7 @@ export default function Footer() {
             <div className="sm:col-span-1">
               <p className="flex items-center font-serif text-xl font-extrabold text-white">
                 <span aria-hidden="true" className="bg-brand mr-2 inline-flex h-8 w-8 -rotate-6 items-center justify-center rounded-xl text-base">C</span>
-                Couponza
+                Couponbase
               </p>
               <p className="mt-3 text-sm text-white/65">Find deals worth trusting.</p>
             </div>
@@ -86,7 +86,7 @@ export default function Footer() {
             ))}
           </div>
           <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} Couponza. Every code community-verified, every commission disclosed.</p>
+            <p>© {new Date().getFullYear()} Couponbase. Every code community-verified, every commission disclosed.</p>
             <p className="rounded-full bg-white/10 px-3 py-1">We may earn a commission when you shop through our links. It never changes the order of results.</p>
           </div>
         </div>

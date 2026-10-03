@@ -20,7 +20,7 @@ export default function PromoStrip() {
         <span className="hidden shrink-0 rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold sm:inline">
           Verified by people
         </span>
-        <div className="marquee relative min-w-0 flex-1 overflow-hidden" aria-label="How Couponza works" role="marquee">
+        <div className="marquee relative min-w-0 flex-1 overflow-hidden" aria-label="How Couponbase works" role="marquee">
           <div className="marquee-track gap-10 whitespace-nowrap text-xs font-medium" style={{ animationDuration: "40s" }}>
             {loop.map((m, i) => (
               <span key={i} className="mr-10 inline-flex items-center gap-2" aria-hidden={i >= MESSAGES.length}>

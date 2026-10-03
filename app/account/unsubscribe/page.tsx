@@ -7,7 +7,7 @@ import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Turn off email alerts",
-  description: "Stop Couponza email alerts without signing in.",
+  description: "Stop Couponbase email alerts without signing in.",
   alternates: { canonical: absoluteUrl("/account/unsubscribe") },
   robots: { index: false, follow: false },
 };
@@ -31,8 +31,8 @@ export default async function UnsubscribePage() {
       <h1 className="font-serif text-3xl text-ink">Turn off email alerts</h1>
       <p className="mt-2 text-ink-soft">
         {email
-          ? "This will stop email alerts for your account. Everything else on Couponza keeps working."
-          : "Enter the address you receive Couponza alerts at and we will stop emailing it. You can turn alerts back on at any time."}
+          ? "This will stop email alerts for your account. Everything else on Couponbase keeps working."
+          : "Enter the address you receive Couponbase alerts at and we will stop emailing it. You can turn alerts back on at any time."}
       </p>
 
       <div className="mt-8">

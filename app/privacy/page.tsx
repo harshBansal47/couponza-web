@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description: "How Couponza handles your data.",
+  description: "How Couponbase handles your data.",
 };
 
 export default function PrivacyPage() {

@@ -111,7 +111,7 @@ export default function MobileNav({
                   >
                     C
                   </span>
-                  Couponza
+                  Couponbase
                 </span>
                 <button
                   type="button"
