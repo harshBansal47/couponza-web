@@ -109,6 +109,10 @@ export interface StoreListParams {
   [key: string]: string | number | boolean | undefined;
 }
 
+function goQuery(src?: string): string {
+  return src ? `?src=${encodeURIComponent(src)}` : "";
+}
+
 export const api = {
   // ---- Public catalogue -------------------------------------------------
 
@@ -122,8 +126,16 @@ export const api = {
   getCouponById: (couponId: string) =>
     apiFetch<CouponPublic>(`/coupons/${couponId}`, { revalidate: 30 }),
 
-  /** Affiliate URLs are only ever resolved by the server-side /go redirect. */
-  goUrl: (couponId: string) => `${API_URL}/coupons/${couponId}/go`,
+  /**
+   * Affiliate URLs are only ever resolved by the server-side /go redirect.
+   * `src` tags which surface sent the click ("coupon-page", "sticky-bar", ...);
+   * the backend only accepts short lowercase tags and files anything else as "unknown".
+   */
+  goUrl: (couponId: string, src?: string) => `${API_URL}/coupons/${couponId}/go${goQuery(src)}`,
+
+  /** Tracked redirect to a product's store page. The raw URL is never in API JSON. */
+  productGoUrl: (productId: string, src?: string) =>
+    `${API_URL}/products/${productId}/go${goQuery(src)}`,
 
   verifyCoupon: (couponId: string, worked: boolean, note?: string) =>
     apiFetch<VerifyResponse>(`/coupons/${couponId}/verify`, {

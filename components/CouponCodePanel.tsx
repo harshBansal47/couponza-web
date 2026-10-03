@@ -101,7 +101,11 @@ export default function CouponCodePanel({ coupon }: { coupon: CouponPublic }) {
       </div>
 
       <div className="px-5 pb-5">
-        <a href={api.goUrl(coupon.id)} className="btn btn-cta w-full py-3 text-base">
+        <a
+          href={api.goUrl(coupon.id, "coupon-page")}
+          rel="sponsored nofollow noopener"
+          className="btn btn-cta w-full py-3 text-base"
+        >
           Get this deal at the store
         </a>
         <p className="mt-2 text-center text-xs text-ink-soft">Opens the store. Come back and tell us if the code worked.</p>

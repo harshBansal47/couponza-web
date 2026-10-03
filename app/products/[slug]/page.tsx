@@ -70,7 +70,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       availability: product.in_stock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      url: product.url ?? absoluteUrl(`/products/${product.slug}`),
+      url: absoluteUrl(`/products/${product.slug}`),
     },
   };
 
@@ -158,12 +158,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </dl>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            {product.url && (
+            {product.has_url && (
               <a
-                href={product.url}
+                href={api.productGoUrl(product.id, "product-page")}
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
-                className="btn-primary"
+                className="btn btn-cta"
               >
                 View at {store?.name ?? "the store"}
               </a>

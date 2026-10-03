@@ -15,8 +15,14 @@ export default function PrivacyPage() {
           products you save or track, and your notification preferences.
         </p>
         <p>
-          Coupon votes are rate-limited by a <em>salted hash</em> of your IP address — we never store
-          the raw address, and it is never shared with merchants or affiliate networks.
+          Coupon votes and outbound clicks are logged with a <em>salted one-way hash</em> of your IP
+          address, never the raw address. We forget even that hash after 90 days; the click itself
+          stays (without you in it) so we can tell which deals actually help shoppers.
+        </p>
+        <p>
+          When you click through to a store, we add a random reference to the link so the store&apos;s
+          affiliate network can tell us a purchase came from Couponbase. That reference identifies the
+          click, not you, and your IP address is never shared with merchants or affiliate networks.
         </p>
         <p>
           We do not sell personal data, and we do not profile you for advertising. Deal rankings are

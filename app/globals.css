@@ -71,7 +71,15 @@ h1, h2, h3 {
 }
 
 /* Buttons: pill shaped, one place so every CTA reads the same. */
-.btn {
+/* The filled/outlined variants carry the base shape themselves, because several
+   pages use `btn-primary` / `btn-outline` on their own. Ghost is excluded on
+   purpose: it is also used for fixed-size icon buttons that must not gain padding. */
+.btn,
+.btn-primary,
+.btn-outline,
+.btn-verified,
+.btn-cta,
+.btn-danger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -99,6 +107,9 @@ h1, h2, h3 {
 
 .btn-outline { background: #fff; color: var(--color-inkblue); border-color: color-mix(in srgb, var(--color-inkblue) 40%, transparent); }
 .btn-outline:hover:not(:disabled) { background: var(--color-inkblue); color: #fff; }
+
+.btn-danger { background: #dc2626; color: #fff; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.28); }
+.btn-danger:hover:not(:disabled) { transform: translateY(-1px); background: #b91c1c; }
 
 .btn-ghost { background: transparent; color: var(--color-ink-soft); }
 .btn-ghost:hover:not(:disabled) { color: var(--color-ink); background: rgba(79, 70, 229, 0.08); }

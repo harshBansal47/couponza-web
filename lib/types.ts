@@ -89,7 +89,8 @@ export interface Product {
   slug: string;
   store_id: string;
   category_id: string;
-  url: string | null;
+  /** Whether a buy link exists. The URL itself is only reachable via api.productGoUrl. */
+  has_url: boolean;
   image_url: string | null;
   currency: string;
   current_price: number | null;

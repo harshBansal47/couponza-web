@@ -34,8 +34,11 @@ export default function VerifiedGauge({ rate, reports, size = 112, tone = "dark"
     let raf = 0;
     const run = () => {
       const start = performance.now();
-      const tick = (now: number) => {
-        const t = Math.min((now - start) / duration, 1);
+      // Read the clock directly instead of using rAF's timestamp argument: the
+      // two can sit on slightly different origins, and a negative elapsed time
+      // would make the count run backwards.
+      const tick = () => {
+        const t = Math.min(Math.max((performance.now() - start) / duration, 0), 1);
         const eased = 1 - Math.pow(1 - t, 3);
         setShown(Math.round(target * eased));
         if (t < 1) raf = requestAnimationFrame(tick);

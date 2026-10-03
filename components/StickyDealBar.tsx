@@ -13,7 +13,8 @@ export default function StickyDealBar({ coupon, storeName }: { coupon: CouponPub
       <div className="flex items-center gap-3 pb-3">
         <p className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">{coupon.title}</p>
         <a
-          href={hasCode ? "#code-panel" : api.goUrl(coupon.id)}
+          href={hasCode ? "#code-panel" : api.goUrl(coupon.id, "sticky-bar")}
+          rel={hasCode ? undefined : "sponsored nofollow noopener"}
           className="btn btn-cta shrink-0 px-5"
         >
           {hasCode ? "Reveal code" : storeName ? `Go to ${storeName}` : "Get deal"}
